@@ -7,23 +7,30 @@ import Updated from '../components/Updated.astro';
 import { getSiteData } from '../lib/data';
 import { compact, price } from '../lib/format';
 import { deltaHtml, escapeHtml } from '../lib/html';
-import { CEDEAR_NAMES } from '../content/names';
+import { CEDEAR_NAMES, ETF_INFO } from '../content/names';
 import type { Quote } from '../lib/types';
 
 const data = await getSiteData();
-const etfs = new Set(['SPY', 'QQQ', 'DIA', 'IWM', 'EWZ', 'GLD', 'SLV', 'ARKK']);
+const etfOrder = Object.keys(ETF_INFO);
+const etfRows = data.cedears.filter((c) => c.symbol in ETF_INFO).sort((a, b) => etfOrder.indexOf(a.symbol) - etfOrder.indexOf(b.symbol));
+const stockRows = data.cedears.filter((c) => !(c.symbol in ETF_INFO)).sort((a, b) => b.monto - a.monto);
 const cols: Column<Quote>[] = [
   { key: 'sym', label: 'CEDEAR', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(CEDEAR_NAMES[r.symbol] ?? '')}</small></span>` },
   { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `$${price(r.price)}` },
   { key: 'pct', label: 'Var. %', v: (r) => r.pct, html: (r) => deltaHtml(r.pct, { plain: true }) },
   { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `$${compact(r.monto)}`, opt: true },
 ];
+const etfCols: Column<Quote>[] = [
+  { key: 'sym', label: 'ETF', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(ETF_INFO[r.symbol][0])}</small></span>` },
+  { key: 'tipo', label: 'Tipo', v: (r) => etfOrder.indexOf(r.symbol), html: (r) => escapeHtml(ETF_INFO[r.symbol][1]), opt: true, align: 'left' },
+  ...cols.slice(1),
+];
 const faq = [
   { q: '¿Qué es un CEDEAR?', a: '<p>Un Certificado de Depósito Argentino: representa una fracción de una acción o ETF que cotiza en el exterior, pero se compra y vende en pesos en la bolsa argentina. Así se puede invertir en empresas como Apple o en índices como el S&amp;P 500 desde una cuenta local.</p>' },
   { q: '¿Por qué un CEDEAR sube aunque la acción no se mueva?', a: '<p>Porque su precio en pesos depende de dos cosas: el precio de la acción en dólares y el tipo de cambio implícito (CCL). Si el dólar CCL sube, el CEDEAR en pesos también sube.</p>' },
 ];
 ---
-<Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de los CEDEARs más operados hoy en pesos: SPY, QQQ, Apple, Nvidia, Mercado Libre y más, con variación diaria y monto operado." crumbs={[{ label: 'CEDEARs', href: '/cedears' }]}>
+<Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de CEDEARs hoy en pesos: ETFs de índices, semiconductores (SMH), energía (XLE), finanzas (XLF), emergentes (EEM), oro y bitcoin, y las acciones más operadas como Apple, Nvidia o Mercado Libre." crumbs={[{ label: 'CEDEARs', href: '/cedears' }]}>
   <section class="page-head">
     <h1>CEDEARs hoy</h1>
     <p class="lead">Acciones y ETFs del exterior que cotizan en pesos en BYMA. Precios por certificado, con demora.</p>
@@ -34,15 +41,15 @@ const faq = [
   </section>
 
   <section class="card" aria-labelledby="etf-title">
-    <div class="section-head"><div><h2 id="etf-title">ETFs</h2><p>Índices y materias primas.</p></div></div>
-    <DataTable rows={data.cedears.filter((c) => etfs.has(c.symbol))} columns={cols} caption="CEDEARs de ETFs" />
+    <div class="section-head"><div><h2 id="etf-title">ETFs</h2><p>{etfRows.length} ETFs: índices, sectores (tecnología, semiconductores, finanzas, energía…), emergentes, materias primas y cripto.</p></div></div>
+    <DataTable rows={etfRows} columns={etfCols} caption="CEDEARs de ETFs" sortKey="tipo" sortDir="ascending" />
   </section>
 
   <AdSlot slot="inline" />
 
   <section class="section card" aria-labelledby="ced-title">
-    <div class="section-head"><div><h2 id="ced-title">Acciones</h2><p>Las más seguidas por inversores argentinos. Tocá una columna para ordenar.</p></div></div>
-    <DataTable rows={data.cedears.filter((c) => !etfs.has(c.symbol)).sort((a, b) => b.monto - a.monto)} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." />
+    <div class="section-head"><div><h2 id="ced-title">Acciones</h2><p>Las {stockRows.length} más operadas del día en BYMA. Tocá una columna para ordenar.</p></div></div>
+    <DataTable rows={stockRows} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." />
   </section>
 
   <Faq items={faq} />

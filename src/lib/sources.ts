@@ -1,6 +1,7 @@
 // Una función por fuente. Cada una devuelve datos ya normalizados.
 import { fetchJSON } from './upstream';
 import { DOLLARS } from './dollars';
+import { ETF_INFO } from '../content/names';
 import { arDateKey } from './format';
 import { compactHistory, lastBefore } from './series';
 import { COINGECKO_URL, normalizeCrypto, type CgRow } from './sources-client';
@@ -174,7 +175,10 @@ const PESOS: Record<string, string> = {
 
 const ADRS_AR = ['YPF', 'GGAL', 'BMA', 'PAM', 'TGS', 'CEPU', 'EDN', 'LOMA', 'SUPV', 'BBAR', 'TEO', 'CRESY', 'IRS', 'TX', 'TS', 'MELI', 'GLOB', 'VIST', 'DESP', 'BIOX', 'CAAP'];
 
-const CEDEARS_TOP = ['SPY', 'QQQ', 'DIA', 'IWM', 'EWZ', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'MELI', 'KO', 'BRKB', 'JPM', 'V', 'WMT', 'MCD', 'DISN', 'NFLX', 'AMD', 'INTC', 'BABA', 'PBR', 'VIST', 'GLOB', 'XOM', 'PFE', 'JNJ', 'COIN', 'MSTR', 'UBER', 'PLTR', 'GLD', 'SLV', 'ARKK', 'BIOX'];
+/** Cuántas acciones vía CEDEAR se publican (las de mayor monto operado del día). */
+const CEDEARS_STOCKS_MAX = 80;
+/** Siempre visibles aunque ese día operen poco. */
+const CEDEARS_ALWAYS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'MELI', 'KO', 'BRKB', 'JPM', 'V', 'WMT', 'VIST', 'GLOB', 'PBR'];
 
 const q = (r: D912, divisor = 1): Quote => ({
   symbol: r.symbol,
@@ -223,8 +227,15 @@ export async function fetchMarket() {
     .filter((b): b is D912 => !!b && b.c > 0)
     .map((b) => ({ ...q(b, 100) }));
 
-  const cmap = new Map(cedearsRaw.map((c) => [c.symbol, c]));
-  const cedears = CEDEARS_TOP.map((s) => cmap.get(s)).filter((c): c is D912 => !!c && c.c > 0).map((c) => q(c));
+  // CEDEARs: todos los ETFs del catálogo + las acciones más operadas.
+  // Se descartan las especies en dólares (sufijo D) y cable (C) cuando existe la de pesos.
+  const cset = new Set(cedearsRaw.map((c) => c.symbol));
+  const cbase = cedearsRaw.filter((c) => c.c > 0 && !(/[DC]$/.test(c.symbol) && cset.has(c.symbol.slice(0, -1))));
+  const etfRows = cbase.filter((c) => c.symbol in ETF_INFO);
+  const stockRows = cbase.filter((c) => !(c.symbol in ETF_INFO)).sort((a, b) => b.v * b.c - a.v * a.c);
+  const topStocks = stockRows.slice(0, CEDEARS_STOCKS_MAX);
+  const extra = stockRows.slice(CEDEARS_STOCKS_MAX).filter((c) => CEDEARS_ALWAYS.includes(c.symbol));
+  const cedears = [...etfRows, ...topStocks, ...extra].map((c) => q(c));
 
   const amap = new Map([...usaRaw, ...adrsRaw].map((a) => [a.symbol, a]));
   const adrs = ADRS_AR.map((s) => amap.get(s)).filter((a): a is D912 => !!a && a.c > 0).map((a) => q(a));

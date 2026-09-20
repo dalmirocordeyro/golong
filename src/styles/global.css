@@ -425,6 +425,8 @@ main { padding-bottom: 48px; }
 .footer-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
 .footer-grid a { color: var(--text-2); }
 .footer-brand p { margin-top: 10px; max-width: 34ch; }
+.footer-tags { font-size: 0.8rem; line-height: 1.7; color: var(--muted); }
+.footer-tags a { color: var(--text-2); }
 .footer-bottom { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 0.8rem; color: var(--muted); }
 .footer-bottom a { color: var(--text-2); font-weight: 600; }
 .disclaimer { font-size: 0.78rem; color: var(--muted); margin-top: 18px; max-width: 110ch; }

@@ -7,25 +7,12 @@ const person = {
   '@type': 'Person',
   name: a.name,
   url: `${SITE.url}/sobre-mi`,
-  ...(a.jobTitle ? { jobTitle: a.jobTitle } : {}),
   ...(a.sameAs.length ? { sameAs: a.sameAs } : {}),
-  mainEntityOfPage: { '@type': 'WebSite', name: SITE.name, url: SITE.url },
 };
-const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person };
-const labelFor = (u: string) => (u.includes('linkedin') ? 'LinkedIn' : u.includes('github') ? 'GitHub' : u.includes('x.com') || u.includes('twitter') ? 'X (Twitter)' : u.includes('instagram') ? 'Instagram' : u.replace(/^https?:\/\//, ''));
 ---
-<Base title={`Sobre mí · ${a.name}`} description={`${a.name}, creador de ${SITE.name}: por qué hice este sitio y cómo contactarme.`} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[profile]}>
+<Base title={a.name} description={a.name} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[{ '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person }]}>
   <section class="page-head">
-    <h1>Hola, soy {a.name}</h1>
-    {a.jobTitle && <p class="lead">{a.jobTitle}</p>}
-  </section>
-  <section class="card prose">
-    <p>Dalmiro Cordeyro - 2026 - Página en Construcción</p>
-    {a.sameAs.length > 0 && (
-      <>
-        <h2>Dónde encontrarme</h2>
-        <ul>{a.sameAs.map((u) => <li><a href={u} rel="me noopener" target="_blank">{labelFor(u)}</a></li>)}</ul>
-      </>
-    )}
+    <h1>{a.name}</h1>
+    <p class="lead">2026 · Página en construcción</p>
   </section>
 </Base>
