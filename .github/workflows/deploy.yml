@@ -1,5 +1,7 @@
 # Regenera el sitio con datos frescos y lo publica en Cloudflare.
 # Corre cada 15 minutos en horario de mercado, cada hora el resto del tiempo y en cada push.
+# Nota: GitHub pausa los workflows programados si el repo pasa 60 días sin cambios.
+# Te avisa por mail; se reactivan con un clic en la pestaña Actions o con cualquier commit.
 name: Actualizar y publicar
 
 on:
@@ -18,7 +20,6 @@ concurrency:
 
 permissions:
   contents: read
-  actions: write # para el keepalive (GitHub pausa los cron sin actividad en 60 días)
 
 jobs:
   deploy:
@@ -27,6 +28,7 @@ jobs:
     env:
       SITE_URL: ${{ vars.SITE_URL }}
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }} # opcional
+      HAS_CLOUDFLARE: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,13 +43,13 @@ jobs:
         run: npm run build
 
       - name: Publicar en Cloudflare
+        if: env.HAS_CLOUDFLARE == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
 
-      - name: Mantener activos los cron
-        if: github.event_name == 'schedule'
-        uses: gautamkrishnar/keepalive-workflow@v2
-        continue-on-error: true
+      - name: Aviso
+        if: env.HAS_CLOUDFLARE != 'true'
+        run: echo "::notice::Sitio generado OK. Falta cargar CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID en Settings > Secrets para publicarlo."
