@@ -25,12 +25,8 @@ export const SITE = {
       // 'https://github.com/tu-usuario',
       // 'https://x.com/tu-usuario',
     ] as string[],
-    /** Descripción breve que aparece en /sobre-mi. Editala a gusto. */
-    jobTitle: '',
   },
 
-  /** Email de contacto público (vacío = no se muestra). */
-  contactEmail: '',
   /** Cuenta de X/Twitter del sitio, sin @ (vacío = no se muestra). */
   x: '',
 

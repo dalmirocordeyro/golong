@@ -15,10 +15,10 @@ Hecho por Dalmiro Cordeyro.
 | `/brecha` | Brecha contra el oficial con historial | calculada |
 | `/riesgo-pais` | EMBI con historial desde 1999 | ArgentinaDatos |
 | `/inflacion` | Mensual, interanual, acumulada, gráficos y tabla | ArgentinaDatos (INDEC) |
-| `/acciones`, `/bonos`, `/cedears`, `/adrs` | Acciones (panel líder y general), bonos (con MEP implícito), CEDEARs, ADRs | data912 |
+| `/acciones`, `/bonos`, `/cedears`, `/adrs` | Acciones (panel líder y general), bonos (con MEP implícito), 35 ETFs por categoría y las ~80 acciones vía CEDEAR más operadas, ADRs | data912 |
 | `/cripto` | Top 10 en dólares y en pesos | CoinGecko |
 | `/herramientas/*` | Conversor y calculadora de plazo fijo vs. dólar e inflación | varias |
-| `/sobre-mi`, `/fuentes`, `/contacto`, `/privacidad`, `/terminos` | Páginas que pide AdSense y que ayudan a que Google te asocie con el sitio | — |
+| `/sobre-mi`, `/fuentes` | Tu nombre (con datos estructurados para Google) y el estado de las fuentes | — |
 
 **Cómo se mantiene actualizado**
 
@@ -98,7 +98,6 @@ En 2 o 3 minutos el sitio queda online en `https://golong.<tu-subdominio>.worker
 ## Que te encuentren a vos en Google
 
 - Completá `author.sameAs` en `src/site.config.ts` con tus perfiles (LinkedIn, GitHub, X). Eso alimenta los datos estructurados `Person` de `/sobre-mi` y es lo que le indica a Google que ese sitio es tuyo.
-- Editá el texto de `src/pages/sobre-mi.astro` y, si querés, `author.jobTitle`.
 - Poné el link a golong en tus perfiles (el vínculo tiene que ir en los dos sentidos).
 - Dá de alta el sitio en **Google Search Console** (https://search.google.com/search-console), verificá el dominio desde Cloudflare y enviá el sitemap: `https://golong.com.ar/sitemap-index.xml`.
 
@@ -132,10 +131,10 @@ Otros comandos útiles:
 
 | Quiero cambiar… | Archivo |
 |---|---|
-| Nombre, dominio, autor, AdSense, email | `src/site.config.ts` |
+| Nombre, dominio, autor, AdSense | `src/site.config.ts` |
 | Colores, tipografía, espaciados | `src/styles/global.css` (variables al principio) |
 | Textos de cada dólar | `src/content/dollars.ts` |
-| Nombres de empresas | `src/content/names.ts` |
+| Nombres de empresas y catálogo de ETFs | `src/content/names.ts` |
 | Qué acciones, bonos o CEDEARs se muestran | `src/lib/sources.ts` |
 | Frecuencia de actualización | `.github/workflows/deploy.yml` |
 

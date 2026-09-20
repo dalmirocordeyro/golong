@@ -5,13 +5,23 @@ import Updated from './Updated.astro';
 interface Props { generatedAt: string }
 const { generatedAt } = Astro.props;
 const year = new Date(generatedAt).getFullYear();
+// Frases de búsqueda frecuentes, cada una enlazada a su página.
+const TAGS: [string, string][] = [
+  ['Dólar hoy Argentina', '/dolar'], ['Dólar blue hoy', '/dolar/blue'], ['Dólar oficial', '/dolar/oficial'], ['Dólar MEP', '/dolar/mep'],
+  ['Dólar CCL', '/dolar/ccl'], ['Dólar tarjeta', '/dolar/tarjeta'], ['Brecha cambiaria', '/brecha'], ['Riesgo país', '/riesgo-pais'],
+  ['Mercados de Argentina', '/acciones'], ['Merval hoy', '/acciones'], ['Bonos argentinos', '/bonos'], ['CEDEARs', '/cedears'],
+  ['ADRs argentinos', '/adrs'], ['Inflación Argentina', '/inflacion'], ['BTC', '/cripto'], ['Precio BTC', '/cripto'],
+  ['Precio Bitcoin', '/cripto'], ['Precio Ethereum', '/cripto'], ['Plazo fijo vs dólar', '/herramientas/plazo-fijo'], ['Conversor de monedas', '/herramientas/conversor'],
+];
 ---
 <footer class="site-footer">
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
         <Logo size={22} />
-        <p>{SITE.tagline}. Datos públicos, actualizados durante el día, en un solo lugar y sin vueltas.</p>
+        <p class="footer-tags">
+          {TAGS.map(([label, href], i) => <>{i > 0 && ' · '}<a href={href}>{label}</a></>)}
+        </p>
         <Updated iso={generatedAt} prefix="Datos generados " />
       </div>
       <div>
@@ -48,9 +58,6 @@ const year = new Date(generatedAt).getFullYear();
         <ul>
           <li><a href="/sobre-mi">Sobre mí</a></li>
           <li><a href="/fuentes">Fuentes de datos</a></li>
-          <li><a href="/contacto">Contacto</a></li>
-          <li><a href="/privacidad">Privacidad</a></li>
-          <li><a href="/terminos">Términos</a></li>
         </ul>
       </div>
     </div>
