@@ -2,6 +2,11 @@
 import Base from '../layouts/Base.astro';
 import { SITE } from '../site.config';
 const a = SITE.author;
+const nombrePerfil = (u: string) =>
+  u.includes('github') ? 'GitHub'
+  : u.includes('linkedin') ? 'LinkedIn'
+  : u.includes('x.com') || u.includes('twitter') ? 'X'
+  : u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const person = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -14,5 +19,12 @@ const person = {
   <section class="page-head">
     <h1>{a.name}</h1>
     <p class="lead">2026 · Página en construcción</p>
+    {a.sameAs.length > 0 && (
+      <p class="perfiles">
+        {a.sameAs.map((u, i) => (
+          <>{i > 0 && <span aria-hidden="true"> · </span>}<a href={u} rel="me noopener" target="_blank">{nombrePerfil(u)}</a></>
+        ))}
+      </p>
+    )}
   </section>
 </Base>

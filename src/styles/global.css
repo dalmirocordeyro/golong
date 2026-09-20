@@ -443,6 +443,8 @@ main { padding-bottom: 48px; }
 .footer-tags a { color: var(--text-2); }
 .footer-bottom { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 0.8rem; color: var(--muted); }
 .footer-bottom a { color: var(--text-2); font-weight: 600; }
+.perfiles { margin-top: 10px; font-size: 0.92rem; }
+.perfiles span { color: var(--muted); }
 .footer-about { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); max-width: 78ch; }
 .footer-about h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin: 0 0 8px; }
 .footer-about p { font-size: 0.86rem; color: var(--text-2); margin: 0 0 8px; }
