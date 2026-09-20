@@ -12,7 +12,8 @@ import Faq from '../components/Faq.astro';
 import { getSiteData } from '../lib/data';
 import { brecha, brechaHistory, breadth, lastDays } from '../lib/derived';
 import { renderSparkline } from '../lib/chart';
-import { monthYear, num, pct } from '../lib/format';
+import { monthYear, num, pct, price } from '../lib/format';
+import { mepEquilibrio, rendimiento } from '../lib/carry';
 import { SITE } from '../site.config';
 
 const data = await getSiteData();
@@ -24,6 +25,10 @@ const cedTop = ['SPY', 'QQQ', 'AAPL', 'NVDA', 'MELI'].map((s) => data.cedears.fi
 const cryptoTop = data.crypto.filter((c) => ['bitcoin', 'ethereum', 'solana', 'ripple'].includes(c.id));
 const brechaBlueHist = lastDays(brechaHistory(d, 'blue'), 365);
 const bestPf = data.plazoFijo[0];
+// Letra en pesos con la tasa mensual más alta, para el acceso al carry trade.
+const carry = data.letras
+  .map((l) => ({ l, ...rendimiento(l), eq: mepEquilibrio(l, d.mep.venta) }))
+  .sort((x, y) => y.tem - x.tem)[0];
 const inf = data.inflacion;
 
 const faq = [
@@ -132,6 +137,11 @@ const faq = [
       <StatTile label={`Inflación de ${monthYear(inf.ultimo[0], true)}`} href="/inflacion" note={`Interanual ${pct(inf.ultimoInteranual[1], 1, false)} · Acumulada ${inf.ultimo[0].slice(0, 4)} ${pct(inf.acumuladoAnio, 1, false)}`}>
         {pct(inf.ultimo[1], 1, false)} <small>mensual</small>
       </StatTile>
+      {carry && (
+        <StatTile label="Tasa en pesos más alta" href="/herramientas/carry-trade" note={`${carry.l.ticker} · Le gana al dólar hasta <b>$${price(carry.eq)}</b>`}>
+          {pct(carry.tem * 100, 2, false)} <small>mensual</small>
+        </StatTile>
+      )}
       {bestPf && (
         <StatTile label="Mejor plazo fijo (TNA)" href="/herramientas/plazo-fijo" note={`${bestPf.entidad} · ¿Le gana al dólar? <b>Calculalo</b>`}>
           {pct(bestPf.tna * 100, 1, false)} <small>anual</small>

@@ -60,6 +60,21 @@ export interface Bond extends Quote {
   nombre: string;
 }
 
+/** Letra o bono del Tesoro a tasa fija en pesos, con su precio de mercado. */
+export interface Letra {
+  ticker: string;
+  tipo: 'LECAP' | 'BONCAP';
+  /** AAAA-MM-DD */
+  vencimiento: string;
+  /** Pesos que paga al vencimiento cada 100 VN */
+  pagoFinal: number;
+  /** Precio de mercado cada 100 VN */
+  price: number;
+  pct: number;
+  /** Monto operado en pesos */
+  monto: number;
+}
+
 export interface Crypto {
   id: string;
   symbol: string;
@@ -106,6 +121,7 @@ export interface SiteData {
   panelLider: string[];
   bonds: Bond[];
   bondsPesos: Quote[];
+  letras: Letra[];
   cedears: Quote[];
   adrs: Quote[];
   crypto: Crypto[];

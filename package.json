@@ -7,10 +7,11 @@
     "build": "astro build",
     "preview": "astro preview",
     "mock": "node dev/mock-server.mjs",
-    "build:mock": "MOCK_UPSTREAM=http://localhost:4599 SHOW_AD_PLACEHOLDERS=1 astro build",
-    "dev:mock": "MOCK_UPSTREAM=http://localhost:4599 SHOW_AD_PLACEHOLDERS=1 astro dev",
+    "build:mock": "node dev/mock-run.mjs build",
+    "dev:mock": "node dev/mock-run.mjs dev",
     "check": "astro check",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "shots": "node dev/shots.mjs"
   },
   "author": "Dalmiro Cordeyro",
   "license": "MIT",

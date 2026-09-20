@@ -107,6 +107,7 @@ const routes = [
   [/^\/api\.argentinadatos\.com\/v1\/finanzas\/tasas\/plazoFijo$/, () => fx.pf],
   [/^\/data912\.com\/live\/arg_stocks$/, () => expand(fx.stocks)],
   [/^\/data912\.com\/live\/arg_bonds$/, () => expand(fx.bonds)],
+  [/^\/data912\.com\/live\/arg_notes$/, () => expand(fx.notes)],
   [/^\/data912\.com\/live\/arg_cedears$/, () => expand(fx.cedears)],
   [/^\/data912\.com\/live\/usa_adrs$/, () => expand(fx.adrs.filter((a) => !['MELI', 'GLOB', 'VIST', 'DESP', 'BIOX', 'CAAP'].includes(a[0])))],
   [/^\/data912\.com\/live\/usa_stocks$/, () => expand(fx.adrs.filter((a) => ['MELI', 'GLOB', 'VIST', 'DESP', 'BIOX', 'CAAP'].includes(a[0])))],
