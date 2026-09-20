@@ -82,8 +82,8 @@ async function build(): Promise<SiteData> {
 
   const m = pickOr(
     market,
-    (p) => ({ stocks: p.stocks, panelLider: p.panelLider, bonds: p.bonds, bondsPesos: p.bondsPesos, cedears: p.cedears, adrs: p.adrs }),
-    { stocks: [], panelLider: [], bonds: [], bondsPesos: [], cedears: [], adrs: [] },
+    (p) => ({ stocks: p.stocks, panelLider: p.panelLider, bonds: p.bonds, bondsPesos: p.bondsPesos, cedears: p.cedears, adrs: p.adrs, letras: p.letras ?? [] }),
+    { stocks: [], panelLider: [], bonds: [], bondsPesos: [], cedears: [], adrs: [], letras: [] },
     'mercado (data912)',
   );
 

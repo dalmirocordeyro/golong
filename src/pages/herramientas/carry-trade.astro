@@ -1,0 +1,322 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import LineChart from '../../components/LineChart.astro';
+import Updated from '../../components/Updated.astro';
+import { getSiteData } from '../../lib/data';
+import { dmy, num, pct, price } from '../../lib/format';
+import { devalMensualEquilibrio, mepEquilibrio, rendimiento } from '../../lib/carry';
+import type { Series } from '../../lib/chart';
+
+const data = await getSiteData();
+const mep = data.dollars.mep.venta;
+const letras = data.letras;
+const filas = letras.map((l) => {
+  const r = rendimiento(l);
+  return { l, ...r, eq: mepEquilibrio(l, mep), deval: devalMensualEquilibrio(r.directo, r.dias) };
+});
+const hay = filas.length > 0;
+const corta = filas[0];
+const larga = filas[filas.length - 1];
+
+const curva: Series[] = [{ key: 'tem', label: 'TEM', slot: 1, points: filas.map((f) => [f.l.vencimiento, f.tem * 100] as [string, number]) }];
+const equilibrio: Series[] = [
+  { key: 'eq', label: 'Dólar de equilibrio', slot: 1, points: filas.map((f) => [f.l.vencimiento, f.eq] as [string, number]) },
+  { key: 'hoy', label: 'MEP de hoy', slot: 3, points: filas.map((f) => [f.l.vencimiento, mep] as [string, number]) },
+];
+
+const cfg = {
+  mep,
+  letras: filas.map((f) => ({ ticker: f.l.ticker, tipo: f.l.tipo, vencimiento: f.l.vencimiento, price: f.l.price, pagoFinal: f.l.pagoFinal })),
+};
+const json = JSON.stringify(cfg).replace(/</g, '\\u003c');
+
+const faq = [
+  {
+    q: '¿Qué es el carry trade?',
+    a: '<p>Es vender dólares (o no comprarlos), poner los pesos a tasa y volver a dólares más adelante. Funciona si la tasa en pesos le gana a lo que sube el dólar en ese período. Si el dólar salta más que la tasa, se pierde en dólares, y puede ser mucho.</p>',
+  },
+  {
+    q: '¿Qué es el dólar de equilibrio?',
+    a: '<p>Es el valor al que tendría que llegar el dólar MEP el día del vencimiento para que dé exactamente lo mismo haber comprado dólares hoy o haber hecho la tasa en pesos. Si el dólar termina por debajo, ganó el carry; si termina por encima, hubiera convenido el dólar.</p>',
+  },
+  {
+    q: '¿Qué son las LECAP y las BONCAP?',
+    a: '<p>Son letras y bonos del Tesoro en pesos a tasa fija. No pagan intereses en el camino: se compran por debajo de lo que van a pagar y al vencimiento devuelven un monto ya conocido. La diferencia entre lo que pagás y lo que cobrás es el rendimiento. Se llaman letras cuando el plazo original es menor a un año y bonos cuando es mayor.</p>',
+  },
+  {
+    q: '¿Puedo vender antes del vencimiento?',
+    a: '<p>Sí, cotizan todos los días. Pero el precio del día depende de las tasas del momento: si las tasas suben, el precio baja y podés vender con pérdida. Los rendimientos de esta página suponen que la mantenés hasta el vencimiento.</p>',
+  },
+  {
+    q: '¿Los precios son de ahora?',
+    a: '<p>Los precios de las letras vienen de data912 y se actualizan con cada actualización del sitio, con demora respecto al mercado. El dólar MEP se refresca solo cada minuto mientras tenés la página abierta. Verificá siempre en tu broker antes de operar.</p>',
+  },
+];
+---
+<Base
+  title="Calculadora de carry trade: LECAP en pesos vs. dólar MEP"
+  description="Calculá cuánto rinde el carry trade con letras del Tesoro en pesos (LECAP y BONCAP) contra el dólar MEP: tasa efectiva mensual, dólar de equilibrio y simulador por escenarios."
+  crumbs={[{ label: 'Herramientas', href: '/herramientas/conversor' }, { label: 'Carry trade', href: '/herramientas/carry-trade' }]}
+>
+  <section class="page-head">
+    <h1>Carry trade: pesos vs. dólar</h1>
+    <p class="lead">Poner pesos a tasa fija y volver al dólar más adelante. Acá ves cuánto rinde cada letra del Tesoro y hasta dónde puede subir el dólar antes de que el negocio deje de convenir.</p>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <Updated iso={data.generatedAt} prefix="Precios de " />
+    </div>
+  </section>
+
+  {!hay && (
+    <section class="card">
+      <p class="mt-0">No hay precios de letras en este momento. Volvé a intentar en un rato.</p>
+    </section>
+  )}
+
+  {hay && (
+    <>
+      <div class="grid g-main" data-carry data-live-need="d:">
+        <section class="card" aria-labelledby="ct-in">
+          <h2 id="ct-in" class="mt-0" style="font-size:1rem;margin-bottom:14px">Tu simulación</h2>
+          <div class="form-row">
+            <div class="field">
+              <label for="ct-monto">Monto en pesos</label>
+              <div class="input-group"><span class="affix">$</span><input id="ct-monto" class="input" inputmode="decimal" value="1.000.000" autocomplete="off" /></div>
+            </div>
+            <div class="field">
+              <label for="ct-com">Comisión del broker %</label>
+              <input id="ct-com" class="input" inputmode="decimal" value="0,15" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="ct-letra">Letra</label>
+              <select id="ct-letra" class="input">
+                {filas.map((f, i) => (
+                  <option value={f.l.ticker} selected={i === 0}>{f.l.ticker} — vence {dmy(f.l.vencimiento)} ({f.dias} días)</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div class="field mt-2">
+            <label for="ct-mep">Dólar MEP al vencimiento</label>
+            <div class="input-group"><span class="affix">$</span><input id="ct-mep" class="input" inputmode="decimal" autocomplete="off" /></div>
+            <div class="seg mt-2" role="group" aria-label="Escenarios de dólar">
+              <button type="button" data-esc="quieto">Quieto</button>
+              <button type="button" data-esc="1">+1% mensual</button>
+              <button type="button" data-esc="2">+2% mensual</button>
+              <button type="button" data-esc="eq">Equilibrio</button>
+            </div>
+          </div>
+
+          <div class="result-list mt-3" aria-live="polite">
+            <div class="result-row"><span>Cobrás al vencimiento</span><b data-o="pesos">—</b></div>
+            <div class="result-row"><span>Rendimiento del período</span><b data-o="directo">—</b></div>
+            <div class="result-row"><span>Tasa efectiva mensual</span><b data-o="tem">—</b></div>
+            <div class="result-row"><span>Tasa efectiva anual</span><b data-o="tea">—</b></div>
+          </div>
+        </section>
+
+        <aside class="grid" style="align-content:start">
+          <article class="card">
+            <h2 class="card-title">Dólar de equilibrio</h2>
+            <p class="mt-1" style="margin-bottom:6px">Hasta acá puede subir el MEP sin que pierdas:</p>
+            <div class="mid" data-o="eq">—</div>
+            <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="eqtxt">—</p>
+          </article>
+          <article class="card">
+            <h2 class="card-title">Resultado en dólares</h2>
+            <p class="mt-1" style="margin-bottom:6px">Con el escenario elegido:</p>
+            <div class="mid" data-o="usd">—</div>
+            <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="usdtxt">—</p>
+          </article>
+        </aside>
+      </div>
+      <script type="application/json" id="ct-data" set:html={json} />
+
+      <p class="disclaimer">El carry trade no es una apuesta gratis: si el dólar salta, la pérdida medida en dólares puede ser grande y rápida. Esto es información, no una recomendación de inversión.</p>
+
+      <AdSlot slot="inline" />
+
+      <section class="section card" aria-labelledby="tabla">
+        <div class="section-head">
+          <div>
+            <h2 id="tabla">Letras del Tesoro a tasa fija</h2>
+            <p>Precio cada 100 de valor nominal y rendimiento si la mantenés hasta el vencimiento.</p>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <caption class="visually-hidden">Rendimiento de letras y bonos del Tesoro en pesos</caption>
+            <thead>
+              <tr>
+                <th scope="col">Letra</th>
+                <th scope="col">Vence</th>
+                <th scope="col" class="opt">Días</th>
+                <th scope="col">Precio</th>
+                <th scope="col">TEM</th>
+                <th scope="col" class="opt">TNA</th>
+                <th scope="col" class="opt">TEA</th>
+                <th scope="col">Dólar de equilibrio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filas.map((f) => (
+                <tr>
+                  <th scope="row"><span class="sym">{f.l.ticker}<small>{f.l.tipo}</small></span></th>
+                  <td>{dmy(f.l.vencimiento)}</td>
+                  <td class="opt">{f.dias}</td>
+                  <td>${num(f.l.price, 2)}</td>
+                  <td><b>{pct(f.tem * 100, 2, false)}</b></td>
+                  <td class="opt">{pct(f.tna * 100, 1, false)}</td>
+                  <td class="opt">{pct(f.tea * 100, 1, false)}</td>
+                  <td data-eq={f.l.ticker}>${price(f.eq)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="tbl-foot">
+          Precios de data912; vencimientos y pago final, de las licitaciones del Tesoro. Los días se cuentan desde la liquidación
+          (plazo 24 horas) hasta el vencimiento. La tabla no descuenta comisiones: en el simulador de arriba podés cargar la de tu
+          broker, que en plazos cortos pesa bastante. El dólar de equilibrio usa el MEP de ${price(mep)}.
+        </p>
+      </section>
+
+      <section class="section">
+        <LineChart
+          series={curva}
+          format="pct"
+          label="Curva de tasa efectiva mensual de las letras en pesos, por fecha de vencimiento"
+          title="Curva de tasas"
+          subtitle="Tasa efectiva mensual de cada letra según su vencimiento."
+          ranges={false}
+          stats={false}
+          area={true}
+          height={260}
+        />
+      </section>
+
+      <section class="section">
+        <LineChart
+          series={equilibrio}
+          format="ars"
+          label="Dólar MEP de equilibrio de cada letra comparado con el MEP de hoy"
+          title="Hasta dónde puede subir el dólar"
+          subtitle="Cada punto es el MEP que dejaría empatada esa letra contra comprar dólares hoy."
+          ranges={false}
+          stats={false}
+          area={false}
+          height={260}
+        />
+      </section>
+
+      <section class="section card prose">
+        <h2>Cómo leer esto</h2>
+        <p>
+          Si comprás {corta.l.ticker} y la mantenés hasta el {dmy(corta.l.vencimiento)}, cobrás {pct(corta.directo * 100, 2, false)} más
+          de lo que pagaste: {pct(corta.tem * 100, 2, false)} por mes. Para que ese rendimiento se transforme en dólares, el MEP tiene que
+          terminar por debajo de ${price(corta.eq)}, que hoy está en ${price(mep)}. Es decir, el dólar puede subir hasta
+          {' '}{pct(corta.deval * 100, 2, false)} por mes antes de que el negocio quede empatado.
+        </p>
+        <p>
+          Cuanto más largo el plazo, más tasa y más riesgo: {larga.l.ticker} vence el {dmy(larga.l.vencimiento)} y rinde
+          {' '}{pct(larga.tem * 100, 2, false)} mensual, pero hay {larga.dias} días por delante para que el dólar haga cualquier cosa.
+          El carry se gana de a poco y se pierde de golpe: en un salto cambiario de 20%, varios meses de tasa se van en una semana.
+        </p>
+        <p>
+          Si preferís algo más simple, mirá la <a href="/herramientas/plazo-fijo">calculadora de plazo fijo</a>, que hace la misma
+          comparación con la tasa de los bancos. También podés ver el <a href="/dolar/mep">dólar MEP</a> y los
+          {' '}<a href="/bonos">bonos soberanos</a>.
+        </p>
+      </section>
+    </>
+  )}
+
+  <Faq items={faq} />
+</Base>
+
+<script>
+  import { num, pct, price } from '../../lib/format';
+  import { escenario, mepEquilibrio, mepProyectado, rendimiento } from '../../lib/carry';
+
+  const root = document.querySelector<HTMLElement>('[data-carry]');
+  const raw = document.getElementById('ct-data');
+  if (root && raw) {
+    type L = { ticker: string; tipo: string; vencimiento: string; price: number; pagoFinal: number };
+    const cfg: { mep: number; letras: L[] } = JSON.parse(raw.textContent!);
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const monto = $<HTMLInputElement>('#ct-monto');
+    const sel = $<HTMLSelectElement>('#ct-letra');
+    const mepIn = $<HTMLInputElement>('#ct-mep');
+    const out = (k: string, v: string) => {
+      const el = root.querySelector(`[data-o="${k}"]`);
+      if (el) el.textContent = v;
+    };
+    const parse = (s: string) => Number(s.replace(/\./g, '').replace(',', '.')) || 0;
+    const setMep = (v: number) => { mepIn.value = num(v, 2); };
+    const com = $<HTMLInputElement>('#ct-com');
+    /** La letra con la comisión de compra ya sumada al precio. */
+    const actual = () => {
+      const l = cfg.letras.find((x) => x.ticker === sel.value) ?? cfg.letras[0];
+      return { ...l, price: l.price * (1 + Math.max(0, parse(com.value)) / 100) };
+    };
+
+    function aplicarEscenario(tipo: string) {
+      const l = actual();
+      const { dias, directo } = rendimiento(l);
+      if (tipo === 'quieto') setMep(cfg.mep);
+      else if (tipo === 'eq') setMep(mepEquilibrio(l, cfg.mep));
+      else setMep(mepProyectado(cfg.mep, Number(tipo) / 100, dias));
+      void directo;
+      calc();
+    }
+
+    function calc() {
+      const l = actual();
+      const m = parse(monto.value);
+      const mepFinal = parse(mepIn.value) || cfg.mep;
+      const { dias, directo, tem, tea } = rendimiento(l);
+      const eq = mepEquilibrio(l, cfg.mep);
+      const e = escenario(l, m, cfg.mep, mepFinal);
+
+      out('pesos', `$${price(e.pesosFinal)}`);
+      out('directo', `${pct(directo * 100, 2, false)} en ${dias} días`);
+      out('tem', pct(tem * 100, 2, false));
+      out('tea', pct(tea * 100, 1, false));
+      out('eq', `$${price(eq)}`);
+      const sube = (eq / cfg.mep - 1) * 100;
+      const mensual = ((1 + directo) ** (30 / dias) - 1) * 100;
+      out('eqtxt', `El MEP está en $${price(cfg.mep)}. Puede subir ${pct(sube, 1, false)} (${pct(mensual, 2, false)} por mes) hasta el ${dias === 1 ? 'vencimiento' : 'vencimiento'} sin que pierdas. Por encima de eso, hubiera convenido comprar dólares.`);
+
+      out('usd', `${e.usdDif >= -0.005 ? '+' : '−'}US$${num(Math.abs(e.usdDif), 2)}`);
+      out('usdtxt', `Con el MEP a $${price(mepFinal)} al vencimiento, los $${price(m)} se transforman en US$${num(e.usdFinal, 2)}, contra los US$${num(e.usdHoy, 2)} que comprarías hoy: ${pct(e.usdPct * 100, 2)} en dólares.`);
+
+      // El dólar de equilibrio de la tabla también sigue al MEP en vivo.
+      for (const el of document.querySelectorAll<HTMLElement>('[data-eq]')) {
+        const li = cfg.letras.find((x) => x.ticker === el.dataset.eq);
+        if (li) el.textContent = `$${price(mepEquilibrio(li, cfg.mep))}`;
+      }
+    }
+
+    setMep(cfg.mep);
+    monto.addEventListener('input', calc);
+    com.addEventListener('input', calc);
+    mepIn.addEventListener('input', calc);
+    sel.addEventListener('change', () => aplicarEscenario('quieto'));
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-esc]')) {
+      b.addEventListener('click', () => aplicarEscenario(b.dataset.esc!));
+    }
+    document.addEventListener('golong:dollars', (ev) => {
+      const m = (ev as CustomEvent).detail?.mep;
+      if (m?.venta) {
+        const previo = parse(mepIn.value);
+        const eraElMep = Math.abs(previo - cfg.mep) < 0.51;
+        cfg.mep = m.venta;
+        if (eraElMep) setMep(cfg.mep);
+        calc();
+      }
+    });
+    calc();
+  }
+</script>

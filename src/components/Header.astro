@@ -12,6 +12,7 @@ const main = [
   { href: '/cedears', label: 'CEDEARs' },
   { href: '/cripto', label: 'Cripto' },
   { href: '/herramientas/conversor', label: 'Conversor' },
+  { href: '/herramientas/carry-trade', label: 'Carry trade', destacado: true },
 ];
 const mobile = [
   ...main.slice(0, 7),
@@ -19,6 +20,7 @@ const mobile = [
   { href: '/cripto', label: 'Cripto' },
   { href: '/herramientas/conversor', label: 'Conversor' },
   { href: '/herramientas/plazo-fijo', label: 'Plazo fijo' },
+  { href: '/herramientas/carry-trade', label: 'Carry trade', destacado: true },
 ];
 const isActive = (href: string) => (href === '/dolar' ? path === '/dolar' || path.startsWith('/dolar/') : path === href);
 ---
@@ -27,7 +29,9 @@ const isActive = (href: string) => (href === '/dolar' ? path === '/dolar' || pat
     <div class="header-row">
       <Logo />
       <nav class="nav" aria-label="Principal">
-        {main.map((l) => <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>)}
+        {main.map((l) => (
+          <a href={l.href} class:list={{ destacado: l.destacado }} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>
+        ))}
       </nav>
       <div class="header-tools">
         <button class="icon-btn theme-toggle" type="button" aria-label="Cambiar tema claro u oscuro" data-theme-toggle>
@@ -37,7 +41,9 @@ const isActive = (href: string) => (href === '/dolar' ? path === '/dolar' || pat
       </div>
     </div>
     <nav class="nav-mobile" aria-label="Secciones">
-      {mobile.map((l) => <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>)}
+      {mobile.map((l) => (
+        <a href={l.href} class:list={{ destacado: l.destacado }} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>
+      ))}
     </nav>
   </div>
 </header>

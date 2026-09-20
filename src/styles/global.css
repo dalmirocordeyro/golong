@@ -135,6 +135,20 @@ main { padding-bottom: 48px; }
 }
 .nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
 .nav a[aria-current='page'] { color: var(--text); background: var(--surface-2); }
+/* Acceso destacado a la calculadora de carry trade */
+.nav a.destacado, .nav-mobile a.destacado {
+  color: var(--accent-ink); background: var(--accent-wash); border: 1px solid var(--accent-wash); font-weight: 650;
+}
+.nav a.destacado::before, .nav-mobile a.destacado::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--accent); margin-right: 7px; vertical-align: 1px;
+}
+.nav a.destacado:hover, .nav-mobile a.destacado:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.nav a.destacado:hover::before, .nav-mobile a.destacado:hover::before { background: #fff; }
+.nav a.destacado[aria-current='page'], .nav-mobile a.destacado[aria-current='page'] {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.nav a.destacado[aria-current='page']::before, .nav-mobile a.destacado[aria-current='page']::before { background: #fff; }
 .header-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .icon-btn {
   display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px;
@@ -429,6 +443,10 @@ main { padding-bottom: 48px; }
 .footer-tags a { color: var(--text-2); }
 .footer-bottom { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 0.8rem; color: var(--muted); }
 .footer-bottom a { color: var(--text-2); font-weight: 600; }
+.footer-about { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); max-width: 78ch; }
+.footer-about h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin: 0 0 8px; }
+.footer-about p { font-size: 0.86rem; color: var(--text-2); margin: 0 0 8px; }
+.footer-about p:last-child { margin-bottom: 0; }
 .disclaimer { font-size: 0.78rem; color: var(--muted); margin-top: 18px; max-width: 110ch; }
 
 /* Utilidades */

@@ -17,7 +17,7 @@ Hecho por Dalmiro Cordeyro.
 | `/inflacion` | Mensual, interanual, acumulada, gráficos y tabla | ArgentinaDatos (INDEC) |
 | `/acciones`, `/bonos`, `/cedears`, `/adrs` | Acciones (panel líder y general), bonos (con MEP implícito), 35 ETFs por categoría y las ~80 acciones vía CEDEAR más operadas, ADRs | data912 |
 | `/cripto` | Top 10 en dólares y en pesos | CoinGecko |
-| `/herramientas/*` | Conversor y calculadora de plazo fijo vs. dólar e inflación | varias |
+| `/herramientas/*` | Conversor, plazo fijo vs. dólar e inflación, y calculadora de carry trade (LECAP/BONCAP contra dólar MEP) | varias |
 | `/sobre-mi`, `/fuentes` | Tu nombre (con datos estructurados para Google) y el estado de las fuentes | — |
 
 **Cómo se mantiene actualizado**
@@ -136,7 +136,16 @@ Otros comandos útiles:
 | Textos de cada dólar | `src/content/dollars.ts` |
 | Nombres de empresas y catálogo de ETFs | `src/content/names.ts` |
 | Qué acciones, bonos o CEDEARs se muestran | `src/lib/sources.ts` |
+| Letras del Tesoro (vencimiento y pago final) | `src/content/letras.ts` |
 | Frecuencia de actualización | `.github/workflows/deploy.yml` |
+
+---
+
+## Mantenimiento: letras del Tesoro
+
+La página de carry trade necesita dos datos que las APIs no publican: el **vencimiento** de cada letra y **cuánto paga al vencimiento** cada 100 de valor nominal. Los dos se fijan en la licitación y no cambian más, así que están cargados a mano en `src/content/letras.ts`.
+
+Después de cada licitación del Tesoro (más o menos dos por mes), agregá ahí las letras nuevas. Las vencidas desaparecen solas. Si aparece una letra en el mercado que no está cargada, el log del build avisa: `letras sin datos de vencimiento`.
 
 ---
 

@@ -2,10 +2,11 @@
 import { fetchJSON } from './upstream';
 import { DOLLARS } from './dollars';
 import { ETF_INFO } from '../content/names';
+import { LETRAS, LETRA_INFO } from '../content/letras';
 import { arDateKey } from './format';
 import { compactHistory, lastBefore } from './series';
 import { COINGECKO_URL, normalizeCrypto, type CgRow } from './sources-client';
-import type { Bond, Crypto, Dollar, DollarSlug, FxRate, Inflacion, PlazoFijo, Point, Quote, Riesgo } from './types';
+import type { Bond, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
 
 // ── DolarApi.com + ArgentinaDatos (historial) ───────────────
 
@@ -190,12 +191,13 @@ const q = (r: D912, divisor = 1): Quote => ({
 });
 
 export async function fetchMarket() {
-  const [stocksRaw, bondsRaw, cedearsRaw, adrsRaw, usaRaw] = await Promise.all([
+  const [stocksRaw, bondsRaw, cedearsRaw, adrsRaw, usaRaw, notesRaw] = await Promise.all([
     fetchJSON<D912[]>('https://data912.com/live/arg_stocks'),
     fetchJSON<D912[]>('https://data912.com/live/arg_bonds'),
     fetchJSON<D912[]>('https://data912.com/live/arg_cedears'),
     fetchJSON<D912[]>('https://data912.com/live/usa_adrs'),
     fetchJSON<D912[]>('https://data912.com/live/usa_stocks').catch(() => [] as D912[]),
+    fetchJSON<D912[]>('https://data912.com/live/arg_notes').catch(() => [] as D912[]),
   ]);
 
   const stockSyms = new Set(stocksRaw.map((s) => s.symbol));
@@ -240,7 +242,33 @@ export async function fetchMarket() {
   const amap = new Map([...usaRaw, ...adrsRaw].map((a) => [a.symbol, a]));
   const adrs = ADRS_AR.map((s) => amap.get(s)).filter((a): a is D912 => !!a && a.c > 0).map((a) => q(a));
 
-  return { stocks, panelLider: PANEL_LIDER, bonds, bondsPesos, cedears, adrs };
+  const letras = buildLetras([...notesRaw, ...bondsRaw]);
+
+  return { stocks, panelLider: PANEL_LIDER, bonds, bondsPesos, cedears, adrs, letras };
+}
+
+/**
+ * Letras y bonos a tasa fija en pesos: precio de data912 + vencimiento y pago
+ * final de la tabla curada (src/content/letras.ts). Las ya vencidas se caen
+ * solas y las que todavía no están cargadas avisan en el log del build.
+ */
+function buildLetras(rows: D912[]): Letra[] {
+  const map = new Map(rows.map((r) => [r.symbol, r]));
+  const hoy = arDateKey(new Date());
+  const letras = LETRAS.filter((l) => l.vencimiento > hoy).flatMap((l) => {
+    const r = map.get(l.ticker);
+    if (!r || !(r.c > 0)) return [];
+    return [{ ...l, price: r.c, pct: r.pct_change, monto: r.v }];
+  });
+  letras.sort((a, b) => a.vencimiento.localeCompare(b.vencimiento));
+
+  const faltan = rows
+    .filter((r) => /^[ST]\d{2}[A-Z]\d$/.test(r.symbol) && r.c > 0 && !LETRA_INFO[r.symbol])
+    .map((r) => r.symbol);
+  if (faltan.length) {
+    console.warn(`[golong] letras sin datos de vencimiento (agregalas en src/content/letras.ts): ${faltan.join(', ')}`);
+  }
+  return letras;
 }
 
 export const BOND_NAMES: Record<string, string> = { ...Object.fromEntries(SOBERANOS.map((s) => [s.symbol, s.nombre])), ...PESOS };
