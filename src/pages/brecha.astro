@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import LineChart from '../components/LineChart.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import StatTile from '../components/StatTile.astro';
+import { getSiteData } from '../lib/data';
+import { brecha, brechaHistory } from '../lib/derived';
+import { pct } from '../lib/format';
+import { rangeStats, sliceRange } from '../lib/series';
+
+const data = await getSiteData();
+const d = data.dollars;
+const hist = {
+  blue: brechaHistory(d, 'blue'),
+  mep: brechaHistory(d, 'mep'),
+  ccl: brechaHistory(d, 'ccl'),
+};
+const yr = rangeStats(sliceRange(hist.blue, 366));
+const faq = [
+  { q: '¿Cómo se calcula la brecha cambiaria?', a: '<p>Se divide el precio del dólar alternativo por el del oficial y se le resta 1. Por ejemplo: blue a $1.100 y oficial a $1.000 → 1.100 / 1.000 − 1 = 10%. Usamos siempre precios de venta.</p>' },
+  { q: '¿Por qué importa la brecha?', a: '<p>Una brecha alta suele indicar desconfianza en el peso o restricciones para acceder al dólar oficial: más gente dispuesta a pagar de más por dólares. Una brecha cercana a cero indica que los distintos mercados están alineados.</p>' },
+  { q: '¿Puede haber brecha negativa?', a: '<p>Sí, cuando un dólar alternativo cotiza por debajo del oficial. Pasa pocas veces y suele durar poco.</p>' },
+];
+---
+<Base title="Brecha cambiaria hoy: blue, MEP y CCL vs. oficial" description="Brecha cambiaria hoy entre el dólar oficial y el blue, MEP, CCL y cripto. Valor en vivo, gráfico histórico y explicación de cómo se calcula." crumbs={[{ label: 'Brecha cambiaria', href: '/brecha' }]}>
+  <section class="page-head">
+    <h1>Brecha cambiaria hoy</h1>
+    <p class="lead">Cuánto más caro está cada dólar alternativo respecto del dólar oficial.</p>
+  </section>
+
+  <div class="grid g-4">
+    {(['blue', 'mep', 'ccl', 'cripto'] as const).map((s) => (
+      <StatTile label={`${d[s].nombre} vs. oficial`} href={`/dolar/${s}`} note={`${d[s].nombreCorto} $${d[s].venta.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Oficial $${d.oficial.venta.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}>
+        <span data-live={`brecha:${s}`}>{pct(brecha(d, s), 1, false)}</span>
+      </StatTile>
+    ))}
+  </div>
+
+  <section class="section">
+    <LineChart
+      title="Evolución de la brecha"
+      subtitle="Diferencia porcentual contra el dólar oficial (venta)."
+      label="Evolución de la brecha cambiaria del blue, MEP y CCL contra el oficial"
+      series={[
+        { key: 'blue', label: 'Blue', slot: 1, points: hist.blue },
+        { key: 'mep', label: 'MEP', slot: 3, points: hist.mep },
+        { key: 'ccl', label: 'CCL', slot: 4, points: hist.ccl },
+      ]}
+      format="pct"
+      range="1a"
+      area={false}
+      refLine={0}
+      statsLabels={{ chg: 'Cambio de la brecha blue' }}
+    />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section card prose">
+    <h2 class="mt-0">¿Qué nos dice la brecha?</h2>
+    <p>La brecha cambiaria compara el precio de un dólar "alternativo" con el del <a href="/dolar/oficial">dólar oficial</a>. Es uno de los indicadores más mirados en Argentina porque resume, en un número, cuánta presión hay sobre el tipo de cambio.</p>
+    {yr && <p>En los últimos doce meses, la brecha del blue se movió entre <strong>{pct(yr.min[1], 1, false)}</strong> y <strong>{pct(yr.max[1], 1, false)}</strong>. Hoy está en <strong data-live="brecha:blue">{pct(brecha(d, 'blue'), 1, false)}</strong>.</p>}
+    <p>Cuando la brecha se agranda, suele ser señal de que más gente busca dolarizarse por fuera del canal oficial. Cuando se achica, los distintos mercados de cambio convergen. Para ver cada cotización en detalle, entrá a <a href="/dolar/blue">dólar blue</a>, <a href="/dolar/mep">MEP</a> o <a href="/dolar/ccl">CCL</a>.</p>
+  </section>
+
+  <Faq items={faq} />
+</Base>

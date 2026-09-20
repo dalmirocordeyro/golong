@@ -1,0 +1,114 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import { getSiteData } from '../../lib/data';
+import { DOLLARS } from '../../lib/dollars';
+import { price } from '../../lib/format';
+
+const data = await getSiteData();
+const rates = DOLLARS.map((m) => ({ slug: m.slug, nombre: m.nombre, compra: data.dollars[m.slug].compra ?? data.dollars[m.slug].venta, venta: data.dollars[m.slug].venta }));
+const fx = data.fx.map((f) => ({ moneda: f.moneda, nombre: f.nombre, compra: f.compra, venta: f.venta }));
+const json = JSON.stringify({ rates, fx }).replace(/</g, '\\u003c');
+const faq = [
+  { q: '¿Qué precio usa el conversor?', a: '<p>Si pasás de pesos a dólares, usamos el precio de <strong>venta</strong> (lo que pagás para comprar). Si pasás de dólares a pesos, el de <strong>compra</strong> (lo que te pagan al vender). Así el resultado se parece a lo que obtendrías en una operación real, sin contar comisiones ni impuestos.</p>' },
+  { q: '¿Incluye impuestos?', a: '<p>Solo el dólar tarjeta incluye los recargos vigentes para consumos en el exterior. El resto son precios de mercado sin comisiones.</p>' },
+];
+---
+<Base title="Conversor de dólar a peso argentino (y viceversa)" description="Convertí pesos a dólares y dólares a pesos con todas las cotizaciones: blue, oficial, MEP, CCL, cripto, tarjeta y mayorista. También euro, real, peso chileno y uruguayo." crumbs={[{ label: 'Herramientas', href: '/herramientas/conversor' }, { label: 'Conversor', href: '/herramientas/conversor' }]}>
+  <section class="page-head">
+    <h1>Conversor de monedas</h1>
+    <p class="lead">Pasá de pesos a dólares (o al revés) con cada tipo de cambio, al instante.</p>
+  </section>
+
+  <div class="grid g-main" data-converter data-live-need="d:">
+    <section class="card" aria-labelledby="conv-in">
+      <h2 id="conv-in" class="visually-hidden">Datos</h2>
+      <div class="seg" role="group" aria-label="Sentido de la conversión" style="margin-bottom:16px">
+        <button type="button" data-dir="ars2usd" aria-pressed="true">Pesos → Dólares</button>
+        <button type="button" data-dir="usd2ars" aria-pressed="false">Dólares → Pesos</button>
+      </div>
+      <div class="field">
+        <label for="amount" data-amount-label>Monto en pesos</label>
+        <div class="input-group"><span class="affix" data-affix>$</span><input id="amount" class="input" inputmode="decimal" autocomplete="off" value="100.000" /></div>
+      </div>
+      <div class="result-list mt-2" aria-live="polite" data-results>
+        {rates.map((r) => (
+          <div class="result-row" data-slug={r.slug}>
+            <span><a href={`/dolar/${r.slug}`}>{r.nombre}</a> <small class="muted" data-rate>a ${price(r.venta)}</small></span>
+            <b data-out>US${price(100000 / r.venta)}</b>
+          </div>
+        ))}
+      </div>
+    </section>
+    <aside class="card" aria-labelledby="otras">
+      <h2 id="otras" class="mt-0" style="font-size:1rem">Otras monedas</h2>
+      <p class="muted" style="font-size:.84rem;margin:4px 0 8px">Cotización oficial (Banco Nación). <span data-fx-hint>Cuánto recibís por el monto en pesos.</span></p>
+      <div class="result-list" data-fx>
+        {fx.map((f) => (
+          <div class="result-row" data-moneda={f.moneda}>
+            <span>{f.nombre} <small class="muted">a ${price(f.venta)}</small></span>
+            <b data-out>{f.moneda} {price(100000 / f.venta)}</b>
+          </div>
+        ))}
+      </div>
+    </aside>
+  </div>
+  <script type="application/json" id="conv-data" set:html={json} />
+
+  <AdSlot slot="inline" />
+  <Faq items={faq} />
+</Base>
+
+<script>
+  import { price } from '../../lib/format';
+  type Rate = { slug: string; nombre: string; compra: number; venta: number };
+  type Fx = { moneda: string; nombre: string; compra: number; venta: number };
+  const data: { rates: Rate[]; fx: Fx[] } = JSON.parse(document.getElementById('conv-data')!.textContent!);
+  const root = document.querySelector<HTMLElement>('[data-converter]')!;
+  const input = root.querySelector<HTMLInputElement>('#amount')!;
+  let dir: 'ars2usd' | 'usd2ars' = 'ars2usd';
+  const parse = (s: string) => Number(s.replace(/\./g, '').replace(',', '.')) || 0;
+
+  function calc() {
+    const a = parse(input.value);
+    for (const r of data.rates) {
+      const row = root.querySelector(`[data-slug="${r.slug}"]`);
+      if (!row) continue;
+      const rate = dir === 'ars2usd' ? r.venta : r.compra;
+      row.querySelector('[data-rate]')!.textContent = `a $${price(rate)}`;
+      row.querySelector('[data-out]')!.textContent = dir === 'ars2usd' ? `US$${price(a / rate)}` : `$${price(a * rate)}`;
+    }
+    for (const f of data.fx) {
+      const row = root.querySelector(`[data-moneda="${f.moneda}"]`);
+      if (!row) continue;
+      // en modo dólares→pesos, convertimos el monto (en USD) a pesos al oficial y de ahí a cada moneda
+      const ars = dir === 'ars2usd' ? a : a * (data.rates.find((r) => r.slug === 'oficial')?.compra ?? 0);
+      row.querySelector('[data-out]')!.textContent = `${f.moneda} ${price(ars / f.venta)}`;
+    }
+    root.querySelector('[data-amount-label]')!.textContent = dir === 'ars2usd' ? 'Monto en pesos' : 'Monto en dólares';
+    root.querySelector('[data-affix]')!.textContent = dir === 'ars2usd' ? '$' : 'US$';
+    root.querySelector('[data-fx-hint]')!.textContent = dir === 'ars2usd' ? 'Cuánto recibís por el monto en pesos.' : 'Cuánto recibís si vendés los dólares al oficial.';
+  }
+  root.querySelectorAll<HTMLButtonElement>('[data-dir]').forEach((b) =>
+    b.addEventListener('click', () => {
+      dir = b.dataset.dir as typeof dir;
+      root.querySelectorAll('[data-dir]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      input.value = dir === 'ars2usd' ? '100.000' : '100';
+      calc();
+    }),
+  );
+  input.addEventListener('input', calc);
+  document.addEventListener('golong:dollars', (e) => {
+    const live = (e as CustomEvent).detail as Record<string, { venta: number; compra: number | null }>;
+    for (const r of data.rates) {
+      const l = live[r.slug];
+      if (l) {
+        r.venta = l.venta;
+        r.compra = l.compra ?? l.venta;
+      }
+    }
+    calc();
+  });
+  calc();
+</script>

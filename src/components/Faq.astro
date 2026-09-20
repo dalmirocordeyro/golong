@@ -1,0 +1,21 @@
+---
+// Preguntas frecuentes + datos estructurados FAQPage (Google).
+interface Props { items: { q: string; a: string }[]; title?: string }
+const { items, title = 'Preguntas frecuentes' } = Astro.props;
+const strip = (html: string) => html.replace(/<[^>]+>/g, '');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: strip(i.a) } })),
+};
+---
+<section class="section card faq" aria-labelledby="faq-title">
+  <h2 id="faq-title" class="mt-0" style="margin-bottom:6px">{title}</h2>
+  {items.map((i, n) => (
+    <details open={n === 0}>
+      <summary>{i.q}</summary>
+      <div class="answer" set:html={i.a} />
+    </details>
+  ))}
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
+</section>

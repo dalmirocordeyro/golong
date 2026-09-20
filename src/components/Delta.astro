@@ -1,0 +1,25 @@
+---
+// Variación con flecha (nunca solo color).
+import { direction, pct, signedNum } from '../lib/format';
+interface Props {
+  value: number | null;
+  mode?: 'pct' | 'pts';
+  plain?: boolean;
+  live?: string;
+  decimals?: number;
+  label?: string;
+}
+const { value, mode = 'pct', plain = false, live, decimals, label } = Astro.props;
+const dir = direction(value, mode === 'pts' ? 0.5 : 0.005);
+const text = mode === 'pts' ? `${signedNum(value, 0)} pts` : pct(value, decimals ?? 2);
+const sr = value == null ? 'sin variación disponible' : dir === 'up' ? 'sube' : dir === 'down' ? 'baja' : 'sin cambios';
+---
+<span class:list={['delta', { plain }]} data-dir={dir} data-live={live} data-mode={mode} title={label}>
+  <svg class="arr" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true">
+    {dir === 'up' && <path d="M5 1.5L9 7.5H1z" fill="currentColor" />}
+    {dir === 'down' && <path d="M5 8.5L1 2.5h8z" fill="currentColor" />}
+    {dir === 'flat' && <rect x="1.5" y="4.25" width="7" height="1.5" rx=".75" fill="currentColor" />}
+  </svg>
+  <span class="visually-hidden">{sr}</span>
+  <span class="dv">{text}</span>
+</span>

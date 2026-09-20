@@ -1,0 +1,101 @@
+---
+import '../styles/global.css';
+import { SITE } from '../site.config';
+import { getSiteData } from '../lib/data';
+import { liveConfig } from '../lib/derived';
+import Header from '../components/Header.astro';
+import Strip from '../components/Strip.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Migas de pan (sin incluir Inicio) */
+  crumbs?: { label: string; href: string }[];
+  jsonLd?: Record<string, unknown>[];
+  noindex?: boolean;
+  /** Título ya completo (sin agregar " | golong") */
+  rawTitle?: boolean;
+}
+const { title, description = SITE.description, crumbs = [], jsonLd = [], noindex = false, rawTitle = false } = Astro.props;
+const data = await getSiteData();
+const path = Astro.url.pathname;
+const canonical = new URL(path, SITE.url).href;
+const fullTitle = rawTitle ? title : `${title} | ${SITE.name}`;
+const ogImage = new URL('/og.png', SITE.url).href;
+
+const ld: Record<string, unknown>[] = [...jsonLd];
+if (crumbs.length) {
+  ld.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [{ label: 'Inicio', href: '/' }, ...crumbs].map((c, i) => ({
+      '@type': 'ListItem', position: i + 1, name: c.label, item: new URL(c.href, SITE.url).href,
+    })),
+  });
+}
+const json = (o: unknown) => JSON.stringify(o).replace(/</g, '\\u003c');
+---
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f4f1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="author" content={SITE.author.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {SITE.x && <meta name="twitter:site" content={`@${SITE.x}`} />}
+    <script is:inline>
+      try { var t = localStorage.getItem('theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+    {SITE.adsense.client && (
+      <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.adsense.client}`} crossorigin="anonymous"></script>
+    )}
+    {ld.map((o) => <script type="application/ld+json" set:html={json(o)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <Header />
+    <Strip data={data} />
+    <main id="contenido">
+      <div class="wrap">
+        {crumbs.length > 0 && (
+          <nav class="crumbs" aria-label="Migas de pan" style="padding-top:18px;margin-bottom:-14px">
+            <a href="/">Inicio</a>
+            {crumbs.map((c, i) => (
+              <>
+                <span aria-hidden="true">/</span>
+                {i === crumbs.length - 1 ? <span aria-current="page">{c.label}</span> : <a href={c.href}>{c.label}</a>}
+              </>
+            ))}
+          </nav>
+        )}
+        <slot />
+      </div>
+    </main>
+    <Footer generatedAt={data.generatedAt} />
+    <script id="live-config" type="application/json" set:html={json(liveConfig(data))} />
+    {SITE.cloudflareAnalyticsToken && (
+      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={json({ token: SITE.cloudflareAnalyticsToken })}></script>
+    )}
+    <script>
+      import '../scripts/relative-time';
+      import '../scripts/live';
+    </script>
+  </body>
+</html>

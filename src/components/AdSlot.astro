@@ -1,0 +1,21 @@
+---
+// Bloque de AdSense con espacio reservado (evita saltos de layout, CLS).
+// Sin configuración no se renderiza nada; con SHOW_AD_PLACEHOLDERS=1 muestra una caja de prueba.
+import { SITE } from '../site.config';
+interface Props { slot?: keyof typeof SITE.adsense.slots; height?: number }
+const { slot = 'inline', height = 120 } = Astro.props;
+const client = SITE.adsense.client;
+const slotId = SITE.adsense.slots[slot];
+const placeholder = !client && process.env.SHOW_AD_PLACEHOLDERS === '1';
+---
+{client && slotId ? (
+  <aside class="ad-slot" style={`--ad-h:${height}px`} aria-label="Publicidad">
+    <div style="width:100%">
+      <span class="ad-label">Publicidad</span>
+      <ins class="adsbygoogle" style="display:block" data-ad-client={client} data-ad-slot={slotId} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </div>
+    <script is:inline>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+) : placeholder ? (
+  <aside class="ad-slot placeholder" style={`--ad-h:${height}px`} aria-hidden="true">Espacio publicitario ({slot})</aside>
+) : null}

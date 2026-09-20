@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import DataTable, { type Column } from '../../components/DataTable.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import Updated from '../../components/Updated.astro';
+import { getSiteData } from '../../lib/data';
+import { compact, price } from '../../lib/format';
+import { deltaHtml, escapeHtml } from '../../lib/html';
+import { CEDEAR_NAMES } from '../../content/names';
+import type { Quote } from '../../lib/types';
+
+const data = await getSiteData();
+const etfs = new Set(['SPY', 'QQQ', 'DIA', 'IWM', 'EWZ', 'GLD', 'SLV', 'ARKK']);
+const cols: Column<Quote>[] = [
+  { key: 'sym', label: 'CEDEAR', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(CEDEAR_NAMES[r.symbol] ?? '')}</small></span>` },
+  { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `$${price(r.price)}` },
+  { key: 'pct', label: 'Var. %', v: (r) => r.pct, html: (r) => deltaHtml(r.pct, { plain: true }) },
+  { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `$${compact(r.monto)}`, opt: true },
+];
+const faq = [
+  { q: '¿Qué es un CEDEAR?', a: '<p>Un Certificado de Depósito Argentino: representa una fracción de una acción o ETF que cotiza en el exterior, pero se compra y vende en pesos en la bolsa argentina. Así se puede invertir en empresas como Apple o en índices como el S&amp;P 500 desde una cuenta local.</p>' },
+  { q: '¿Por qué un CEDEAR sube aunque la acción no se mueva?', a: '<p>Porque su precio en pesos depende de dos cosas: el precio de la acción en dólares y el tipo de cambio implícito (CCL). Si el dólar CCL sube, el CEDEAR en pesos también sube.</p>' },
+];
+---
+<Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de los CEDEARs más operados hoy en pesos: SPY, QQQ, Apple, Nvidia, Mercado Libre y más, con variación diaria y monto operado." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'CEDEARs', href: '/mercado/cedears' }]}>
+  <section class="page-head">
+    <h1>CEDEARs hoy</h1>
+    <p class="lead">Acciones y ETFs del exterior que cotizan en pesos en BYMA. Precios por certificado, con demora.</p>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <Updated iso={data.generatedAt} prefix="Datos de " />
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="etf-title">
+    <div class="section-head"><div><h2 id="etf-title">ETFs</h2><p>Índices y materias primas.</p></div></div>
+    <DataTable rows={data.cedears.filter((c) => etfs.has(c.symbol))} columns={cols} caption="CEDEARs de ETFs" />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section card" aria-labelledby="ced-title">
+    <div class="section-head"><div><h2 id="ced-title">Acciones</h2><p>Las más seguidas por inversores argentinos. Tocá una columna para ordenar.</p></div></div>
+    <DataTable rows={data.cedears.filter((c) => !etfs.has(c.symbol)).sort((a, b) => b.monto - a.monto)} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." />
+  </section>
+
+  <Faq items={faq} />
+</Base>

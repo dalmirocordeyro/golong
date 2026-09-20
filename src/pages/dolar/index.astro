@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import MiniDollar from '../../components/MiniDollar.astro';
+import LineChart from '../../components/LineChart.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import Price from '../../components/Price.astro';
+import Delta from '../../components/Delta.astro';
+import Updated from '../../components/Updated.astro';
+import { getSiteData } from '../../lib/data';
+import { DOLLARS } from '../../lib/dollars';
+import { brecha } from '../../lib/derived';
+import { pct } from '../../lib/format';
+
+const data = await getSiteData();
+const d = data.dollars;
+const faq = [
+  { q: '¿Cuántos tipos de dólar hay en Argentina?', a: '<p>Los más seguidos son el oficial (bancos), el blue (informal), el MEP y el CCL (a través de la bolsa), el cripto (stablecoins), el tarjeta (consumos en el exterior) y el mayorista (bancos y empresas). Cada uno responde a un mercado y a reglas distintas.</p>' },
+  { q: '¿Cuál es el dólar más barato para comprar?', a: '<p>Depende del momento y de tu situación. En esta página podés comparar el precio de venta de cada uno en tiempo real. Tené en cuenta comisiones, impuestos y plazos de cada canal. Esto no es una recomendación de inversión.</p>' },
+];
+---
+<Base title="Cotizaciones del dólar hoy: todos los tipos de cambio" description="Todos los tipos de dólar en Argentina en una tabla: blue, oficial, MEP, CCL, cripto, tarjeta y mayorista. Precio de compra y venta, variación y brecha en vivo." crumbs={[{ label: 'Dólar', href: '/dolar' }]}>
+  <section class="page-head">
+    <h1>Cotizaciones del dólar hoy</h1>
+    <p class="lead">Todos los tipos de cambio de Argentina en un solo lugar. Tocá cualquiera para ver su historial.</p>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <span>Se actualiza solo cada minuto</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <caption class="visually-hidden">Cotización de todos los tipos de dólar</caption>
+        <thead>
+          <tr><th scope="col">Dólar</th><th scope="col">Compra</th><th scope="col">Venta</th><th scope="col">Variación</th><th scope="col">Brecha</th><th scope="col" class="opt">Actualizado</th></tr>
+        </thead>
+        <tbody>
+          {DOLLARS.map((m) => {
+            const x = d[m.slug];
+            return (
+              <tr>
+                <th scope="row"><a class="sym" href={`/dolar/${m.slug}`}>{x.nombre}</a><small class="muted" style="display:block;font-size:.76rem">{m.resumen}</small></th>
+                <td>{x.compra != null ? <Price value={x.compra} live={`d:${m.slug}:compra`} /> : '—'}</td>
+                <td><b><Price value={x.venta} live={`d:${m.slug}:venta`} /></b></td>
+                <td><Delta value={x.varPct} plain live={`d:${m.slug}:var`} /></td>
+                <td>{m.slug === 'oficial' ? '—' : <span data-live={`brecha:${m.slug}`}>{pct(brecha(d, m.slug), 1, false)}</span>}</td>
+                <td class="opt"><Updated iso={x.fecha} live={`d:${m.slug}:time`} /></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">Variación contra el cierre del día hábil anterior. Brecha contra el dólar oficial.</p>
+  </section>
+
+  <section class="section">
+    <LineChart
+      title="Comparación histórica"
+      label="Evolución del precio de venta de los dólares blue, oficial, MEP y CCL"
+      series={[
+        { key: 'blue', label: 'Blue', slot: 1, points: d.blue.history },
+        { key: 'oficial', label: 'Oficial', slot: 2, points: d.oficial.history },
+        { key: 'mep', label: 'MEP', slot: 3, points: d.mep.history },
+        { key: 'ccl', label: 'CCL', slot: 4, points: d.ccl.history },
+      ]}
+      format="ars"
+      range="6m"
+      area={false}
+      stats={false}
+    />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section">
+    <div class="grid g-4">
+      {DOLLARS.map((m) => <MiniDollar d={d[m.slug]} brecha={['blue', 'mep', 'ccl', 'cripto'].includes(m.slug) ? brecha(d, m.slug) : null} />)}
+    </div>
+  </section>
+
+  <Faq items={faq} />
+</Base>

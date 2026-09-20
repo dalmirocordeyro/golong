@@ -1,0 +1,76 @@
+---
+import Base from '../../layouts/Base.astro';
+import DataTable, { type Column } from '../../components/DataTable.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import Updated from '../../components/Updated.astro';
+import { getSiteData } from '../../lib/data';
+import { breadth } from '../../lib/derived';
+import { compact, pct, price } from '../../lib/format';
+import { deltaHtml, escapeHtml } from '../../lib/html';
+import type { Quote } from '../../lib/types';
+import { STOCK_NAMES } from '../../content/names';
+
+const data = await getSiteData();
+const b = breadth(data);
+const lider = new Set(data.panelLider);
+const general = data.stocks.filter((s) => !lider.has(s.symbol));
+const up = [...b.rows].sort((x, y) => y.pct - x.pct).slice(0, 3);
+const down = [...b.rows].sort((x, y) => x.pct - y.pct).slice(0, 3);
+
+const cols: Column<Quote>[] = [
+  { key: 'sym', label: 'Especie', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(STOCK_NAMES[r.symbol] ?? '')}</small></span>` },
+  { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `$${price(r.price)}` },
+  { key: 'pct', label: 'Var. %', v: (r) => r.pct, html: (r) => deltaHtml(r.pct, { plain: true }) },
+  { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `$${compact(r.monto)}`, opt: true },
+  { key: 'bid', label: 'Compra', v: (r) => r.bid, html: (r) => (r.bid ? `$${price(r.bid)}` : '—'), opt: true },
+  { key: 'ask', label: 'Venta', v: (r) => r.ask, html: (r) => (r.ask ? `$${price(r.ask)}` : '—'), opt: true },
+];
+const faq = [
+  { q: '¿Qué es el panel líder del Merval?', a: '<p>Es el grupo de acciones más negociadas de la Bolsa de Buenos Aires, que forman parte del índice S&amp;P Merval. Incluye bancos, energéticas, utilities y otras empresas grandes.</p>' },
+  { q: '¿Los precios son en tiempo real?', a: '<p>No. Los precios pueden tener una demora de varios minutos respecto del mercado. Para operar, consultá siempre a tu broker.</p>' },
+];
+---
+<Base title="Acciones del Merval hoy: panel líder y panel general" description="Cotización de las acciones argentinas hoy: panel líder del Merval y panel general con precio, variación diaria y monto operado." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'Acciones', href: '/mercado/acciones' }]}>
+  <section class="page-head">
+    <h1>Acciones argentinas hoy</h1>
+    <p class="lead">Panel líder y panel general de BYMA. Precios en pesos con demora.</p>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <Updated iso={data.generatedAt} prefix="Datos de " />
+    </div>
+  </section>
+
+  <div class="grid g-3">
+    <article class="card stat">
+      <div class="label"><span>Panel líder hoy</span></div>
+      <div class="value">{pct(b.avg, 2)} <small>promedio</small></div>
+      <div class="breadth" role="img" aria-label={`${b.up} suben, ${b.flat} sin cambios, ${b.down} bajan`}>
+        <i class="u" style={`flex:${b.up}`}></i><i class="f" style={`flex:${b.flat}`}></i><i class="d" style={`flex:${b.down}`}></i>
+      </div>
+      <div class="breadth-lbl"><span class="t-up">▲ {b.up} suben</span><span>{b.flat} sin cambios</span><span class="t-down">{b.down} bajan ▼</span></div>
+    </article>
+    <article class="card">
+      <h2 class="card-title">Mayores subas</h2>
+      <div class="movers mt-1">{up.map((r) => <a href="#panel-lider"><span class="sym">{r.symbol}</span><span class="px num">${price(r.price)}</span><Fragment set:html={deltaHtml(r.pct)} /></a>)}</div>
+    </article>
+    <article class="card">
+      <h2 class="card-title">Mayores bajas</h2>
+      <div class="movers mt-1">{down.map((r) => <a href="#panel-lider"><span class="sym">{r.symbol}</span><span class="px num">${price(r.price)}</span><Fragment set:html={deltaHtml(r.pct)} /></a>)}</div>
+    </article>
+  </div>
+
+  <section class="section card" id="panel-lider" aria-labelledby="pl-title">
+    <div class="section-head"><div><h2 id="pl-title">Panel líder</h2><p>Tocá una columna para ordenar.</p></div></div>
+    <DataTable rows={b.rows.sort((x, y) => y.monto - x.monto)} columns={cols} caption="Acciones del panel líder" sortKey="monto" />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section card" aria-labelledby="pg-title">
+    <div class="section-head"><div><h2 id="pg-title">Panel general</h2><p>Resto de las acciones con cotización, ordenadas por monto operado.</p></div></div>
+    <DataTable rows={general} columns={cols} caption="Acciones del panel general" sortKey="monto" note="Monto operado en pesos. Compra y venta: mejores puntas al momento de la actualización." />
+  </section>
+
+  <Faq items={faq} />
+</Base>

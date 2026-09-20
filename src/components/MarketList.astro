@@ -1,0 +1,16 @@
+---
+import type { Quote } from '../lib/types';
+import { price } from '../lib/format';
+import Delta from './Delta.astro';
+interface Props { rows: Quote[]; cur?: string; href: string; names?: Record<string, string>; priceOf?: 'price' }
+const { rows, cur = '$', href, names = {} } = Astro.props;
+---
+<div class="movers">
+  {rows.map((r) => (
+    <a href={href}>
+      <span class="sym">{r.symbol}{names[r.symbol] && <small class="muted" style="font-weight:450;margin-left:6px">{names[r.symbol]}</small>}</span>
+      <span class="px num">{cur}{price(r.price)}</span>
+      <Delta value={r.pct} />
+    </a>
+  ))}
+</div>

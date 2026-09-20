@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import LineChart from '../components/LineChart.astro';
+import BarChart from '../components/BarChart.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import StatTile from '../components/StatTile.astro';
+import { getSiteData } from '../lib/data';
+import { monthYear, pct } from '../lib/format';
+
+const data = await getSiteData();
+const inf = data.inflacion;
+const last24 = inf.mensual.slice(-24);
+const table = inf.mensual.slice(-12).reverse().map((p) => ({ fecha: p[0], mensual: p[1], interanual: inf.interanual.find((x) => x[0] === p[0])?.[1] ?? null }));
+const prevMonth = inf.mensual[inf.mensual.length - 2];
+const year = inf.ultimo[0].slice(0, 4);
+const faq = [
+  { q: '¿Quién mide la inflación en Argentina?', a: '<p>El INDEC, a través del Índice de Precios al Consumidor (IPC). Publica el dato de cada mes a mediados del mes siguiente, según su calendario oficial.</p>' },
+  { q: '¿Qué diferencia hay entre inflación mensual, interanual y acumulada?', a: '<p>La <strong>mensual</strong> compara los precios con el mes anterior. La <strong>interanual</strong> los compara con el mismo mes del año anterior. La <strong>acumulada</strong> suma (componiendo) la inflación desde enero del año en curso.</p>' },
+  { q: '¿Cómo se calcula la inflación acumulada?', a: '<p>Multiplicando los factores de cada mes: (1 + inflación de enero) × (1 + inflación de febrero) × … − 1. No es la suma simple de los porcentajes.</p>' },
+];
+---
+<Base title="Inflación en Argentina: último dato del INDEC y evolución" description="Inflación en Argentina: último dato mensual del IPC del INDEC, inflación interanual, acumulada del año y gráficos históricos." crumbs={[{ label: 'Inflación', href: '/inflacion' }]}>
+  <section class="page-head">
+    <h1>Inflación en Argentina</h1>
+    <p class="lead">Índice de Precios al Consumidor (IPC) del INDEC. Último dato: {monthYear(inf.ultimo[0], true)}.</p>
+  </section>
+
+  <div class="grid g-4">
+    <StatTile label={`Mensual · ${monthYear(inf.ultimo[0], true)}`} note={prevMonth ? `Mes anterior: ${pct(prevMonth[1], 1, false)}` : undefined}>{pct(inf.ultimo[1], 1, false)}</StatTile>
+    <StatTile label="Interanual" note="Contra el mismo mes del año anterior">{pct(inf.ultimoInteranual[1], 1, false)}</StatTile>
+    <StatTile label={`Acumulada ${year}`} note={`${inf.mesesAcumulados} ${inf.mesesAcumulados === 1 ? 'mes' : 'meses'}`}>{pct(inf.acumuladoAnio, 1, false)}</StatTile>
+    <StatTile label="Promedio mensual (12 meses)" note="Promedio geométrico">{pct((Math.pow(inf.mensual.slice(-12).reduce((a, p) => a * (1 + p[1] / 100), 1), 1 / 12) - 1) * 100, 1, false)}</StatTile>
+  </div>
+
+  <section class="section">
+    <BarChart title="Inflación mensual" subtitle="Últimos 24 meses, en %." label="Gráfico de barras de la inflación mensual de los últimos 24 meses" points={last24} format="pct" />
+  </section>
+
+  <section class="section">
+    <LineChart
+      title="Inflación interanual"
+      subtitle="Variación contra el mismo mes del año anterior, en %."
+      label="Evolución de la inflación interanual"
+      series={[{ key: 'ia', label: 'Interanual', slot: 1, points: inf.interanual }]}
+      format="pct"
+      range="5a"
+      ranges={['1a', '5a', 'max']}
+      stats={false}
+    />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section card" aria-labelledby="tabla-inf">
+    <h2 id="tabla-inf" class="mt-0" style="margin-bottom:10px">Últimos 12 meses</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <caption class="visually-hidden">Inflación mensual e interanual de los últimos 12 meses</caption>
+        <thead><tr><th scope="col">Mes</th><th scope="col">Mensual</th><th scope="col">Interanual</th></tr></thead>
+        <tbody>
+          {table.map((r) => (
+            <tr><th scope="row" style="text-transform:capitalize">{monthYear(r.fecha, true)}</th><td>{pct(r.mensual, 1, false)}</td><td>{r.interanual != null ? pct(r.interanual, 1, false) : '—'}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">Fuente: INDEC, vía ArgentinaDatos.</p>
+  </section>
+
+  <section class="section card prose">
+    <h2 class="mt-0">Inflación y dólar</h2>
+    <p>Comparar la inflación con la suba del dólar ayuda a entender si el peso gana o pierde poder de compra frente a la moneda estadounidense. Si en un período los precios suben más que el dólar, se dice que hay "atraso cambiario"; si el dólar sube más que los precios, el peso se deprecia en términos reales.</p>
+    <p>Para ver si una inversión en pesos le gana a la inflación, probá nuestra <a href="/herramientas/plazo-fijo">calculadora de plazo fijo vs. dólar e inflación</a>.</p>
+  </section>
+
+  <Faq items={faq} />
+</Base>

@@ -1,0 +1,31 @@
+{
+  "name": "golong",
+  "version": "1.0.0",
+  "description": "Dólar hoy, riesgo país y mercados de Argentina",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "mock": "node dev/mock-server.mjs",
+    "build:mock": "MOCK_UPSTREAM=http://localhost:4599 SHOW_AD_PLACEHOLDERS=1 astro build",
+    "dev:mock": "MOCK_UPSTREAM=http://localhost:4599 SHOW_AD_PLACEHOLDERS=1 astro dev",
+    "check": "astro check",
+    "deploy": "wrangler deploy"
+  },
+  "author": "Dalmiro Cordeyro",
+  "license": "MIT",
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.135.0"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

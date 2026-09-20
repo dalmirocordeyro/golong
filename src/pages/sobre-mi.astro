@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+const a = SITE.author;
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: a.name,
+  url: `${SITE.url}/sobre-mi`,
+  ...(a.jobTitle ? { jobTitle: a.jobTitle } : {}),
+  ...(a.sameAs.length ? { sameAs: a.sameAs } : {}),
+  mainEntityOfPage: { '@type': 'WebSite', name: SITE.name, url: SITE.url },
+};
+const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person };
+const labelFor = (u: string) => (u.includes('linkedin') ? 'LinkedIn' : u.includes('github') ? 'GitHub' : u.includes('x.com') || u.includes('twitter') ? 'X (Twitter)' : u.includes('instagram') ? 'Instagram' : u.replace(/^https?:\/\//, ''));
+---
+<Base title={`Sobre mí · ${a.name}`} description={`${a.name}, creador de ${SITE.name}: por qué hice este sitio y cómo contactarme.`} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[profile]}>
+  <section class="page-head">
+    <h1>Hola, soy {a.name}</h1>
+    {a.jobTitle && <p class="lead">{a.jobTitle}</p>}
+  </section>
+  <section class="card prose">
+    <p>Hice <strong>{SITE.name}</strong> porque quería tener en un solo lugar, rápido y sin ventanas emergentes, los números que miro todos los días: el dólar en todas sus versiones, la brecha, el riesgo país, la inflación y los mercados.</p>
+    <p>La idea es simple: datos públicos, bien presentados, que se actualicen solos y que se entiendan de un vistazo, tanto en el celular como en la compu. Cada número indica de dónde sale y cuándo se actualizó por última vez.</p>
+    <p>El sitio es un proyecto personal. Se sostiene con publicidad y no vende ni opera divisas ni inversiones. Nada de lo que publico es una recomendación: es información para que cada uno saque sus conclusiones.</p>
+    <p>Si encontrás un error, tenés una idea o querés contarme algo, <a href="/contacto">escribime</a>.</p>
+    {a.sameAs.length > 0 && (
+      <>
+        <h2>Dónde encontrarme</h2>
+        <ul>{a.sameAs.map((u) => <li><a href={u} rel="me noopener" target="_blank">{labelFor(u)}</a></li>)}</ul>
+      </>
+    )}
+  </section>
+</Base>

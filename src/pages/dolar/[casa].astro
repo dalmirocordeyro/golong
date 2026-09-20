@@ -1,0 +1,172 @@
+---
+import Base from '../../layouts/Base.astro';
+import QuoteCard from '../../components/QuoteCard.astro';
+import LineChart from '../../components/LineChart.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import { getSiteData } from '../../lib/data';
+import { DOLLARS } from '../../lib/dollars';
+import { DOLLAR_CONTENT } from '../../content/dollars';
+import { brecha } from '../../lib/derived';
+import { dmy, pct, price } from '../../lib/format';
+import { deltaHtml } from '../../lib/html';
+import { toTime } from '../../lib/series';
+import type { DollarSlug } from '../../lib/types';
+
+export function getStaticPaths() {
+  return DOLLARS.map((d) => ({ params: { casa: d.slug } }));
+}
+
+const slug = Astro.params.casa as DollarSlug;
+const data = await getSiteData();
+const d = data.dollars[slug];
+const c = DOLLAR_CONTENT[slug];
+const others = DOLLARS.filter((x) => x.slug !== slug);
+
+// Últimos 10 días hábiles
+const weekdays = d.history.filter((p) => {
+  const wd = new Date(toTime(p[0])).getUTCDay();
+  return wd !== 0 && wd !== 6;
+});
+const recent = weekdays.slice(-11);
+const recentRows = recent.slice(1).map((p, i) => ({ fecha: p[0], venta: p[1], var: (p[1] / recent[i][1] - 1) * 100 })).reverse();
+
+const hasBrecha = !['oficial', 'mayorista', 'tarjeta'].includes(slug);
+const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : null;
+---
+<Base title={c.title} rawTitle={false} description={c.description} crumbs={[{ label: 'Dólar', href: '/dolar' }, { label: d.nombre, href: `/dolar/${slug}` }]}>
+  <section class="page-head">
+    <h1>{d.nombre} hoy</h1>
+    <p class="lead">{c.lead}</p>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <span>Se actualiza solo cada minuto</span>
+    </div>
+  </section>
+
+  <div class="grid g-main">
+    <QuoteCard d={d} link={false} headingLevel="h2" />
+    <aside class="card" aria-labelledby="conv-title" data-conv data-slug={slug} data-venta={d.venta} data-compra={d.compra ?? d.venta}>
+      <h2 id="conv-title" class="mt-0" style="font-size:1rem">Calculadora rápida</h2>
+      <p class="muted" style="font-size:.84rem;margin:4px 0 14px">Al precio de {d.compra != null && d.compra !== d.venta ? 'venta (comprar) y compra (vender)' : 'referencia'} del {d.nombre.toLowerCase()}.</p>
+      <div class="field">
+        <label for="conv-usd">Dólares</label>
+        <div class="input-group"><span class="affix">US$</span><input id="conv-usd" class="input" inputmode="decimal" autocomplete="off" value="100" data-conv-usd /></div>
+      </div>
+      <div class="result-list mt-1">
+        <div class="result-row"><span>Para comprarlos pagás</span><b data-conv-buy>${price(100 * d.venta)}</b></div>
+        {d.compra != null && d.compra !== d.venta && <div class="result-row"><span>Si los vendés recibís</span><b data-conv-sell>${price(100 * d.compra)}</b></div>}
+      </div>
+      <div class="field mt-2">
+        <label for="conv-ars">Pesos</label>
+        <div class="input-group"><span class="affix">$</span><input id="conv-ars" class="input" inputmode="decimal" autocomplete="off" value="100.000" data-conv-ars /></div>
+      </div>
+      <div class="result-list mt-1">
+        <div class="result-row"><span>Te alcanza para</span><b data-conv-get>US${price(100000 / d.venta)}</b></div>
+      </div>
+      <p class="mt-2 mb-0" style="font-size:.84rem;margin-bottom:0"><a href="/herramientas/conversor">Conversor completo con todos los dólares →</a></p>
+    </aside>
+  </div>
+
+  <section class="section">
+    <LineChart
+      title={`Evolución del ${d.nombre.toLowerCase()}`}
+      subtitle="Precio de venta. Diario en el último año, semanal antes."
+      label={`Gráfico histórico del precio de venta del ${d.nombre.toLowerCase()}`}
+      series={[{ key: slug, label: d.nombreCorto, slot: 1, points: d.history }]}
+      format="ars"
+      range="3m"
+    />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <div class="grid g-2 section">
+    <section class="card" aria-labelledby="hist-title">
+      <h2 id="hist-title" class="mt-0">Últimos días</h2>
+      <p class="muted" style="font-size:.84rem;margin:4px 0 10px">Cierre de cada día hábil (venta).</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <caption class="visually-hidden">Historial reciente del {d.nombre}</caption>
+          <thead><tr><th scope="col">Fecha</th><th scope="col">Venta</th><th scope="col">Variación</th></tr></thead>
+          <tbody>
+            {recentRows.map((r) => (
+              <tr><th scope="row">{dmy(r.fecha)}</th><td>${price(r.venta)}</td><td set:html={deltaHtml(r.var, { plain: true })} /></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="cmp-title">
+      <h2 id="cmp-title" class="mt-0">Comparación con otros dólares</h2>
+      <p class="muted" style="font-size:.84rem;margin:4px 0 10px">Cuánto más caro (+) o barato (−) está cada uno respecto del {d.nombreCorto.toLowerCase()}.</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <caption class="visually-hidden">Comparación del {d.nombre} con los demás dólares</caption>
+          <thead><tr><th scope="col">Dólar</th><th scope="col">Venta</th><th scope="col">Diferencia</th></tr></thead>
+          <tbody>
+            {others.map((o) => {
+              const od = data.dollars[o.slug];
+              const diff = (od.venta / d.venta - 1) * 100;
+              return (
+                <tr>
+                  <th scope="row"><a href={`/dolar/${o.slug}`}>{o.nombre}</a></th>
+                  <td>${price(od.venta)}</td>
+                  <td>{pct(diff, 1)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {hasBrecha && <p class="mt-2 mb-0" style="font-size:.9rem;margin-bottom:0">Brecha con el oficial: <b>{pct(brecha(data.dollars, slug), 1)}</b>. <a href="/brecha">Ver historial de la brecha →</a></p>}
+      {recargoTarjeta != null && <p class="mt-2" style="font-size:.9rem;margin-bottom:0">Hoy el dólar tarjeta está <b>{pct(recargoTarjeta, 1, false)}</b> por encima del oficial.</p>}
+    </section>
+  </div>
+
+  <section class="section card prose" set:html={c.about} />
+
+  <Faq items={c.faq} />
+
+  <nav class="section" aria-label="Otros dólares">
+    <h2 style="font-size:1rem;margin-bottom:10px">Otras cotizaciones</h2>
+    <div class="chips">
+      {others.map((o) => <a href={`/dolar/${o.slug}`}>{o.nombre}</a>)}
+      <a href="/brecha">Brecha cambiaria</a>
+      <a href="/herramientas/conversor">Conversor</a>
+    </div>
+  </nav>
+</Base>
+
+<script>
+  import { price } from '../../lib/format';
+  const box = document.querySelector<HTMLElement>('[data-conv]');
+  if (box) {
+    let venta = Number(box.dataset.venta);
+    let compra = Number(box.dataset.compra);
+    const usd = box.querySelector<HTMLInputElement>('[data-conv-usd]')!;
+    const ars = box.querySelector<HTMLInputElement>('[data-conv-ars]')!;
+    const parse = (s: string) => Number(s.replace(/\./g, '').replace(',', '.')) || 0;
+    const set = (sel: string, txt: string) => {
+      const el = box.querySelector(sel);
+      if (el) el.textContent = txt;
+    };
+    const calc = () => {
+      const u = parse(usd.value);
+      const a = parse(ars.value);
+      set('[data-conv-buy]', `$${price(u * venta)}`);
+      set('[data-conv-sell]', `$${price(u * compra)}`);
+      set('[data-conv-get]', `US$${price(a / venta)}`);
+    };
+    usd.addEventListener('input', calc);
+    ars.addEventListener('input', calc);
+    document.addEventListener('golong:dollars', (e) => {
+      const d = (e as CustomEvent).detail[box.dataset.slug!];
+      if (d) {
+        venta = d.venta;
+        compra = d.compra ?? d.venta;
+        calc();
+      }
+    });
+  }
+</script>

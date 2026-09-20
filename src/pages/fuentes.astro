@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import { getSiteData } from '../lib/data';
+import Updated from '../components/Updated.astro';
+const data = await getSiteData();
+const s = data.sources;
+const rows = [
+  { key: 'dolarapi', name: 'DolarApi.com', url: 'https://dolarapi.com', what: 'Cotizaciones del dólar (oficial, blue, MEP, CCL, cripto, tarjeta, mayorista) y otras monedas.', freq: 'Cada minuto en tu navegador; en cada actualización del sitio.' },
+  { key: 'argentinadatos', name: 'ArgentinaDatos', url: 'https://argentinadatos.com', what: 'Historial del dólar, riesgo país (JP Morgan), inflación (INDEC) y tasas de plazo fijo (BCRA).', freq: 'En cada actualización del sitio.' },
+  { key: 'data912', name: 'data912', url: 'https://data912.com', what: 'Acciones, bonos, CEDEARs y ADRs. Precios con demora.', freq: 'En cada actualización del sitio.' },
+  { key: 'coingecko', name: 'CoinGecko', url: 'https://www.coingecko.com', what: 'Precios y capitalización de criptomonedas.', freq: 'Cada dos minutos en tu navegador; en cada actualización del sitio.' },
+] as const;
+---
+<Base title="Fuentes de datos" description="De dónde salen los datos que muestra el sitio: DolarApi, ArgentinaDatos, data912 y CoinGecko. Frecuencia de actualización y estado de cada fuente." crumbs={[{ label: 'Fuentes de datos', href: '/fuentes' }]}>
+  <section class="page-head">
+    <h1>Fuentes de datos</h1>
+    <p class="lead">Todo lo que ves acá proviene de fuentes públicas y gratuitas. Gracias a quienes las mantienen.</p>
+    <div class="status-line"><Updated iso={data.generatedAt} prefix="Última actualización del sitio: " /></div>
+  </section>
+  <section class="card">
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <caption class="visually-hidden">Fuentes de datos y su estado</caption>
+        <thead><tr><th scope="col" style="text-align:left">Fuente</th><th scope="col" style="text-align:left">Qué datos</th><th scope="col" style="text-align:left" class="opt">Frecuencia</th><th scope="col">Estado</th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <th scope="row"><a href={r.url} rel="noopener" target="_blank">{r.name}</a></th>
+              <td style="text-align:left;white-space:normal;min-width:220px">{r.what}</td>
+              <td class="opt" style="text-align:left;white-space:normal;min-width:180px">{r.freq}</td>
+              <td>{s[r.key].ok ? <span class="pill" data-state="open"><span class="dot"></span>OK</span> : <span class="pill" data-state="stale" title={s[r.key].error}><span class="dot"></span>Datos anteriores</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="section card prose">
+    <h2 class="mt-0">Cómo funciona</h2>
+    <p>El sitio se regenera automáticamente varias veces por hora con los últimos datos de cada fuente. Además, mientras tenés la página abierta, tu navegador consulta directamente las cotizaciones del dólar y de las criptomonedas para mostrarte el precio más reciente sin recargar.</p>
+    <p>Si alguna fuente no responde, se muestran los últimos datos válidos y se indica en esta página. Los precios de acciones y bonos pueden tener demora y no deben usarse para operar.</p>
+  </section>
+</Base>

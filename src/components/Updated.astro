@@ -1,0 +1,7 @@
+---
+// Fecha absoluta en el HTML; el navegador la convierte en "hace X min" (el HTML se genera antes de que lo veas).
+import { shortDateTime } from '../lib/format';
+interface Props { iso: string; prefix?: string; live?: string }
+const { iso, prefix = '', live } = Astro.props;
+---
+<span class="updated">{prefix}<time datetime={iso} data-rel data-live={live} title={shortDateTime(iso)}>{shortDateTime(iso)}</time></span>

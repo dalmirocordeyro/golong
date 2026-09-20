@@ -1,0 +1,33 @@
+---
+import type { Dollar } from '../lib/types';
+import { renderSparkline } from '../lib/chart';
+import { lastDays } from '../lib/derived';
+import { price } from '../lib/format';
+import Price from './Price.astro';
+import Delta from './Delta.astro';
+import Updated from './Updated.astro';
+interface Props { d: Dollar; headingLevel?: 'h2' | 'h3'; link?: boolean }
+const { d, headingLevel = 'h2', link = true } = Astro.props;
+const H = headingLevel;
+const spark = renderSparkline(lastDays(d.history, 30), 300, 44, 1);
+---
+<article class="card quote-card">
+  <div class="top">
+    <H class="mt-0">{link ? <a href={`/dolar/${d.slug}`}>{d.nombre}</a> : d.nombre}</H>
+    <Delta value={d.varPct} live={`d:${d.slug}:var`} label="Variación contra el cierre anterior" />
+  </div>
+  <div>
+    <div class="muted" style="font-size:.8rem;margin-bottom:4px">Venta</div>
+    <Price value={d.venta} size="big" live={`d:${d.slug}:venta`} />
+  </div>
+  <div class="kv">
+    {d.compra != null && <span>Compra <b><Price value={d.compra} live={`d:${d.slug}:compra`} /></b></span>}
+    {d.compra != null && <span>Spread <b data-live={`d:${d.slug}:spread`}>${price(d.venta - d.compra)}</b></span>}
+    {d.prev != null && <span>Cierre ant. <b>${price(d.prev)}</b></span>}
+  </div>
+  <div class="spark-box" set:html={spark} aria-hidden="true" title="Últimos 30 días" />
+  <div class="foot">
+    <Updated iso={d.fecha} prefix="Actualizado " live={`d:${d.slug}:time`} />
+    {link && <a class="nowrap" href={`/dolar/${d.slug}`} style="font-size:.84rem;font-weight:600">Ver historial →</a>}
+  </div>
+</article>

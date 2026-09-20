@@ -1,0 +1,22 @@
+---
+import type { Dollar } from '../lib/types';
+import Price from './Price.astro';
+import Delta from './Delta.astro';
+import Updated from './Updated.astro';
+import { pct } from '../lib/format';
+interface Props { d: Dollar; brecha?: number | null }
+const { d, brecha } = Astro.props;
+---
+<article class="card mini">
+  <h3 class="name mt-0">{d.nombre}</h3>
+  <div class="row">
+    <Price value={d.venta} size="mid" live={`d:${d.slug}:venta`} />
+    <Delta value={d.varPct} live={`d:${d.slug}:var`} />
+  </div>
+  <div class="sub">
+    {d.compra != null && d.compra !== d.venta ? <span>Compra <b><Price value={d.compra} live={`d:${d.slug}:compra`} /></b></span> : <span>Precio de referencia</span>}
+    {brecha != null && <span>Brecha <b data-live={`brecha:${d.slug}`}>{pct(brecha, 1, false)}</b></span>}
+  </div>
+  <Updated iso={d.fecha} live={`d:${d.slug}:time`} />
+  <a class="cover" href={`/dolar/${d.slug}`} aria-label={`Ver ${d.nombre}`}></a>
+</article>

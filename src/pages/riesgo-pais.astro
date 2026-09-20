@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import LineChart from '../components/LineChart.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import StatTile from '../components/StatTile.astro';
+import Delta from '../components/Delta.astro';
+import { getSiteData } from '../lib/data';
+import { dmy, num } from '../lib/format';
+import { rangeStats, sliceRange } from '../lib/series';
+
+const data = await getSiteData();
+const r = data.riesgo;
+const y1 = rangeStats(sliceRange(r.history, 366));
+const m1 = rangeStats(sliceRange(r.history, 31));
+const all = rangeStats(r.history);
+const faq = [
+  { q: '¿Qué es el riesgo país?', a: '<p>Es el índice EMBI (Emerging Markets Bond Index) que calcula el banco JP Morgan. Mide la diferencia de tasa que pagan los bonos argentinos en dólares frente a los bonos del Tesoro de Estados Unidos. Se expresa en puntos básicos: 100 puntos equivalen a 1 punto porcentual de tasa adicional.</p>' },
+  { q: '¿Qué significa que suba o baje?', a: '<p>Si sube, los inversores piden más rendimiento para prestarle al país porque perciben más riesgo; los precios de los bonos bajan. Si baja, el mercado confía más y los bonos suben. Un riesgo país bajo facilita que el Estado y las empresas consigan financiamiento más barato.</p>' },
+  { q: '¿Cada cuánto se actualiza?', a: '<p>JP Morgan publica el valor de cierre de cada día hábil. Lo mostramos apenas está disponible en nuestra fuente.</p>' },
+];
+---
+<Base title="Riesgo país hoy: valor del EMBI de Argentina y evolución" description="Riesgo país de Argentina hoy: valor del índice EMBI de JP Morgan en puntos básicos, variación diaria y gráfico histórico desde 1999." crumbs={[{ label: 'Riesgo país', href: '/riesgo-pais' }]}>
+  <section class="page-head">
+    <h1>Riesgo país hoy</h1>
+    <p class="lead">Índice EMBI de JP Morgan para Argentina, en puntos básicos. Dato de cierre del {dmy(r.fecha)}.</p>
+  </section>
+
+  <div class="grid g-4">
+    <StatTile label="Riesgo país" note={`Cierre ${dmy(r.fecha)}`}>
+      <Delta slot="delta" value={r.varPts} mode="pts" />
+      {num(r.valor, 0)} <small>pts</small>
+    </StatTile>
+    {m1 && <StatTile label="Último mes" note={`Hace un mes: ${num(m1.first, 0)} pts`}>{m1.changeAbs >= 0 ? '+' : ''}{num(m1.changeAbs, 0)} <small>pts</small></StatTile>}
+    {y1 && <StatTile label="Mínimo del último año" note={dmy(y1.min[0])}>{num(y1.min[1], 0)} <small>pts</small></StatTile>}
+    {y1 && <StatTile label="Máximo del último año" note={dmy(y1.max[0])}>{num(y1.max[1], 0)} <small>pts</small></StatTile>}
+  </div>
+
+  <section class="section">
+    <LineChart
+      title="Evolución del riesgo país"
+      subtitle="Puntos básicos. Diario en el último año, semanal antes."
+      label="Gráfico histórico del riesgo país de Argentina"
+      series={[{ key: 'riesgo', label: 'Riesgo país', slot: 1, points: r.history }]}
+      format="pts"
+      range="1a"
+      ranges={['1m', '3m', '6m', '1a', '5a', 'max']}
+    />
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <section class="section card prose">
+    <h2 class="mt-0">¿Cómo leer el riesgo país?</h2>
+    <p>El riesgo país muestra cuánto más rendimiento exigen los inversores a los bonos argentinos en dólares en comparación con los bonos de Estados Unidos, que se consideran libres de riesgo. Un valor de {num(r.valor, 0)} puntos significa que, en promedio, la deuda argentina paga unos {num(r.valor / 100, 1)} puntos porcentuales más de tasa por año.</p>
+    {all && <p>En la serie disponible, el valor más alto fue de <strong>{num(all.max[1], 0)} puntos</strong> ({dmy(all.max[0])}) y el más bajo de <strong>{num(all.min[1], 0)} puntos</strong> ({dmy(all.min[0])}).</p>}
+    <p>Se mueve en sentido contrario al precio de los bonos: cuando los <a href="/mercado/bonos">bonos soberanos</a> suben, el riesgo país baja. También influye la situación global: si suben las tasas en Estados Unidos o hay aversión al riesgo, los países emergentes suelen verse afectados.</p>
+  </section>
+
+  <Faq items={faq} />
+</Base>

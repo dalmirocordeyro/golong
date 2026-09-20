@@ -1,0 +1,74 @@
+---
+// Tabla ordenable. Cada columna define cómo mostrar (html) y cómo ordenar (v).
+export interface Column<T> {
+  key: string;
+  label: string;
+  /** HTML de la celda (ya escapado) */
+  html: (row: T) => string;
+  /** valor para ordenar */
+  v?: (row: T) => number | string | null;
+  /** ocultar en pantallas chicas */
+  opt?: boolean;
+  align?: 'left' | 'right';
+}
+interface Props { rows: any[]; columns: Column<any>[]; caption: string; sortKey?: string; sortDir?: 'ascending' | 'descending'; note?: string; id?: string }
+const { rows, columns, caption, sortKey, sortDir = 'descending', note, id } = Astro.props;
+---
+<div class="tbl-wrap">
+  <table class="tbl" data-sortable id={id}>
+    <caption class="visually-hidden">{caption}</caption>
+    <thead>
+      <tr>
+        {columns.map((c) => (
+          <th scope="col" class:list={{ opt: c.opt }} style={c.align === 'left' ? 'text-align:left' : undefined} aria-sort={c.v ? (c.key === sortKey ? sortDir : 'none') : undefined} data-key={c.key}>
+            {c.v ? <button type="button">{c.label}</button> : c.label}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          {columns.map((c, i) => {
+            const v = c.v?.(r);
+            return i === 0 ? (
+              <th scope="row" data-v={v ?? ''} set:html={c.html(r)} />
+            ) : (
+              <td class:list={{ opt: c.opt }} data-v={v ?? ''} style={c.align === 'left' ? 'text-align:left' : undefined} set:html={c.html(r)} />
+            );
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+{note && <p class="tbl-foot" set:html={note} />}
+
+<script>
+  document.querySelectorAll<HTMLTableElement>('table[data-sortable]').forEach((table) => {
+    const heads = [...table.tHead!.rows[0].cells];
+    heads.forEach((th, col) => {
+      const btn = th.querySelector('button');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const dir = th.getAttribute('aria-sort') === 'descending' ? 'ascending' : 'descending';
+        heads.forEach((h) => h.querySelector('button') && h.setAttribute('aria-sort', 'none'));
+        th.setAttribute('aria-sort', dir);
+        const body = table.tBodies[0];
+        const rows = [...body.rows];
+        const val = (r: HTMLTableRowElement) => {
+          const raw = (r.cells[col] as HTMLElement).dataset.v ?? '';
+          const n = Number(raw);
+          return raw !== '' && Number.isFinite(n) ? n : raw.toLowerCase();
+        };
+        rows.sort((a, b) => {
+          const x = val(a);
+          const y = val(b);
+          const c = typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), 'es');
+          return dir === 'ascending' ? c : -c;
+        });
+        body.append(...rows);
+      });
+    });
+  });
+</script>

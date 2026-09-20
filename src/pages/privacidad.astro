@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+<Base title="Política de privacidad" description={`Política de privacidad y uso de cookies de ${SITE.name}.`} crumbs={[{ label: 'Privacidad', href: '/privacidad' }]}>
+  <section class="page-head">
+    <h1>Política de privacidad</h1>
+    <p class="lead">Qué datos se usan cuando visitás {SITE.name} y cómo podés controlarlos.</p>
+  </section>
+  <section class="card prose">
+    <h2 class="mt-0">Datos que no recolectamos</h2>
+    <p>{SITE.name} no tiene registro de usuarios, no pide datos personales y no guarda formularios. Las calculadoras funcionan íntegramente en tu navegador: los montos que escribís no se envían a ningún servidor.</p>
+
+    <h2>Almacenamiento local</h2>
+    <p>Guardamos en tu navegador (localStorage) únicamente tu preferencia de tema claro u oscuro. Podés borrarla limpiando los datos del sitio.</p>
+
+    <h2>Consultas a servicios de datos</h2>
+    <p>Para mostrarte cotizaciones actualizadas, tu navegador consulta directamente servicios públicos como DolarApi y CoinGecko. Como en cualquier conexión a internet, esos servicios pueden ver tu dirección IP. Ver <a href="/fuentes">Fuentes de datos</a>.</p>
+
+    <h2>Estadísticas</h2>
+    <p>Podemos usar Cloudflare Web Analytics para contar visitas de forma agregada. No usa cookies ni identifica a las personas.</p>
+
+    <h2>Publicidad y cookies de terceros</h2>
+    <p>Este sitio puede mostrar anuncios de Google AdSense. Los proveedores externos, incluido Google, utilizan cookies para mostrar anuncios basados en las visitas anteriores de un usuario a este u otros sitios web. Las cookies de publicidad permiten a Google y a sus socios mostrar anuncios según esas visitas.</p>
+    <p>Podés inhabilitar la publicidad personalizada desde la <a href="https://adssettings.google.com" rel="noopener" target="_blank">Configuración de anuncios de Google</a>, o desactivar las cookies de proveedores externos en <a href="https://www.aboutads.info/choices" rel="noopener" target="_blank">aboutads.info</a>. Más información en <a href="https://policies.google.com/technologies/ads" rel="noopener" target="_blank">cómo usa Google las cookies en publicidad</a>.</p>
+
+    <h2>Tus derechos</h2>
+    <p>De acuerdo con la Ley 25.326 de Protección de Datos Personales, podés solicitar acceso, rectificación o supresión de tus datos. Como no almacenamos datos personales, en la práctica no hay información tuya en nuestros sistemas. Para cualquier consulta, usá la página de <a href="/contacto">contacto</a>.</p>
+
+    <h2>Cambios</h2>
+    <p>Esta política puede actualizarse. La versión vigente es siempre la publicada en esta página.</p>
+  </section>
+</Base>

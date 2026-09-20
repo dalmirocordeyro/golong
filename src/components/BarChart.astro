@@ -1,0 +1,24 @@
+---
+import { renderBarChart, type ValueFormat } from '../lib/chart';
+import { monthShortYear } from '../lib/format';
+import type { Point } from '../lib/types';
+interface Props { points: Point[]; format: ValueFormat; label: string; height?: number; slot?: number; title?: string; subtitle?: string }
+const { points, format, label, height = 260, slot = 1, title, subtitle } = Astro.props;
+const svg = renderBarChart({ points, width: 800, height, format, slot, label: monthShortYear, labelIdx: [points.length - 1] });
+const json = JSON.stringify({ type: 'bar', points, format, height, slot, label: 'month' }).replace(/</g, '\\u003c');
+---
+<div class="card chart-card" data-chart>
+  {title && (
+    <div class="chart-toolbar">
+      <div>
+        <h2>{title}</h2>
+        {subtitle && <p class="muted mt-0" style="font-size:.86rem;margin-top:2px">{subtitle}</p>}
+      </div>
+    </div>
+  )}
+  <div class="chart" tabindex="0" role="img" aria-label={`${label}. Usá las flechas para recorrer los valores.`} set:html={svg} />
+  <script type="application/json" set:html={json} />
+</div>
+<script>
+  import '../scripts/charts';
+</script>

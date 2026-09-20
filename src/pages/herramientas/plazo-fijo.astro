@@ -1,0 +1,148 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Faq from '../../components/Faq.astro';
+import { getSiteData } from '../../lib/data';
+import { pct, price } from '../../lib/format';
+
+const data = await getSiteData();
+const banks = data.plazoFijo;
+const best = banks[0];
+const mep = data.dollars.mep.venta;
+const inf = data.inflacion.ultimo;
+const json = JSON.stringify({ mep, infl: inf[1], inflMes: inf[0] }).replace(/</g, '\\u003c');
+const faq = [
+  { q: '¿Qué es la TNA?', a: '<p>La Tasa Nominal Anual es la tasa que informan los bancos. Para un plazo fijo a 30 días, el interés del mes se calcula como TNA × 30 / 365. Si renovás todos los meses reinvirtiendo los intereses, el rendimiento anual efectivo (TEA) es mayor que la TNA.</p>' },
+  { q: '¿Cómo sé si un plazo fijo le gana al dólar?', a: '<p>Calculamos el "dólar de equilibrio": el precio que tendría que tener el dólar MEP al final del plazo para que dé lo mismo haber comprado dólares hoy. Si creés que el dólar va a quedar por debajo de ese valor, el plazo fijo rinde más; si va a quedar por encima, rinde menos.</p>' },
+  { q: '¿Las tasas están actualizadas?', a: '<p>Las tasas se toman del relevamiento que publica el BCRA para plazos fijos a 30 días y se actualizan cuando la fuente las cambia. Confirmá siempre la tasa en tu banco antes de invertir.</p>' },
+];
+---
+<Base title="Calculadora de plazo fijo: ¿le gana al dólar y a la inflación?" description="Calculá cuánto rinde tu plazo fijo, compará las tasas de los bancos y descubrí si le gana al dólar MEP y a la inflación." crumbs={[{ label: 'Herramientas', href: '/herramientas/conversor' }, { label: 'Plazo fijo', href: '/herramientas/plazo-fijo' }]}>
+  <section class="page-head">
+    <h1>Plazo fijo vs. dólar e inflación</h1>
+    <p class="lead">Simulá tu plazo fijo con la tasa de cada banco y compará contra el dólar MEP y la última inflación.</p>
+  </section>
+
+  <div class="grid g-main" data-pf data-live-need="d:">
+    <section class="card" aria-labelledby="pf-in">
+      <h2 id="pf-in" class="mt-0" style="font-size:1rem;margin-bottom:14px">Tu plazo fijo</h2>
+      <div class="form-row">
+        <div class="field">
+          <label for="pf-monto">Monto</label>
+          <div class="input-group"><span class="affix">$</span><input id="pf-monto" class="input" inputmode="decimal" value="1.000.000" autocomplete="off" /></div>
+        </div>
+        <div class="field">
+          <label for="pf-dias">Plazo (días)</label>
+          <input id="pf-dias" class="input" inputmode="numeric" value="30" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="pf-tna">TNA %</label>
+          <input id="pf-tna" class="input" inputmode="decimal" value={best ? (best.tna * 100).toFixed(2).replace('.', ',') : '30'} autocomplete="off" />
+        </div>
+      </div>
+      <div class="field mt-2">
+        <label for="pf-banco">O elegí un banco</label>
+        <select id="pf-banco" class="input">
+          {banks.map((b, i) => <option value={b.tna} selected={i === 0}>{b.entidad} — {pct(b.tna * 100, 2, false)}</option>)}
+        </select>
+      </div>
+
+      <div class="result-list mt-3" aria-live="polite">
+        <div class="result-row"><span>Intereses ganados</span><b data-o="int">—</b></div>
+        <div class="result-row"><span>Total al vencimiento</span><b data-o="total">—</b></div>
+        <div class="result-row"><span>Tasa efectiva del período</span><b data-o="tep">—</b></div>
+        <div class="result-row"><span>Tasa efectiva anual (renovando)</span><b data-o="tea">—</b></div>
+      </div>
+    </section>
+
+    <aside class="grid" style="align-content:start">
+      <article class="card">
+        <h2 class="card-title">Contra el dólar MEP</h2>
+        <p class="mt-1" style="margin-bottom:6px">Dólar de equilibrio al vencimiento:</p>
+        <div class="mid" data-o="eq">—</div>
+        <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="eqtxt">—</p>
+      </article>
+      <article class="card">
+        <h2 class="card-title">Contra la inflación</h2>
+        <p class="mt-1" style="margin-bottom:6px">Tasa real mensual estimada:</p>
+        <div class="mid" data-o="real">—</div>
+        <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="realtxt">—</p>
+      </article>
+    </aside>
+  </div>
+  <script type="application/json" id="pf-data" set:html={json} />
+
+  <AdSlot slot="inline" />
+
+  <section class="section card" aria-labelledby="tasas">
+    <div class="section-head"><div><h2 id="tasas">Tasas de plazo fijo por banco</h2><p>TNA para plazos fijos tradicionales a 30 días.</p></div></div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <caption class="visually-hidden">Tasas de plazo fijo por banco</caption>
+        <thead><tr><th scope="col">Banco</th><th scope="col">TNA clientes</th><th scope="col">TNA no clientes</th><th scope="col" class="opt">Ganancia mensual c/ $1.000.000</th></tr></thead>
+        <tbody>
+          {banks.map((b) => (
+            <tr>
+              <th scope="row">{b.enlace ? <a href={b.enlace} rel="nofollow noopener" target="_blank">{b.entidad}</a> : b.entidad}</th>
+              <td><b>{pct(b.tna * 100, 2, false)}</b></td>
+              <td>{b.tnaNoClientes ? pct(b.tnaNoClientes * 100, 2, false) : '—'}</td>
+              <td class="opt">${price(1_000_000 * b.tna * 30 / 365)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-foot">Fuente: BCRA vía ArgentinaDatos. Confirmá la tasa con tu banco antes de invertir.</p>
+  </section>
+
+  <Faq items={faq} />
+</Base>
+
+<script>
+  import { pct, price, monthYear } from '../../lib/format';
+  const root = document.querySelector<HTMLElement>('[data-pf]')!;
+  const cfg: { mep: number; infl: number; inflMes: string } = JSON.parse(document.getElementById('pf-data')!.textContent!);
+  const $ = (id: string) => root.querySelector<HTMLInputElement>(id)!;
+  const monto = $('#pf-monto');
+  const dias = $('#pf-dias');
+  const tna = $('#pf-tna');
+  const banco = root.querySelector<HTMLSelectElement>('#pf-banco')!;
+  const out = (k: string, v: string) => {
+    const el = root.querySelector(`[data-o="${k}"]`);
+    if (el) el.textContent = v;
+  };
+  const parse = (s: string) => Number(s.replace(/\./g, '').replace(',', '.')) || 0;
+
+  function calc() {
+    const m = parse(monto.value);
+    const d = Math.max(1, Math.round(parse(dias.value)));
+    const r = parse(tna.value) / 100;
+    const tep = (r * d) / 365;
+    const interes = m * tep;
+    const tea = Math.pow(1 + tep, 365 / d) - 1;
+    out('int', `$${price(interes)}`);
+    out('total', `$${price(m + interes)}`);
+    out('tep', pct(tep * 100, 2, false));
+    out('tea', pct(tea * 100, 2, false));
+    const eq = cfg.mep * (1 + tep);
+    out('eq', `$${price(eq)}`);
+    out('eqtxt', `Hoy el MEP está a $${price(cfg.mep)}. Si en ${d} días está por debajo de $${price(eq)} (${pct(tep * 100, 1)}), el plazo fijo rinde más que comprar dólares.`);
+    const tem = Math.pow(1 + tep, 30 / d) - 1;
+    const real = ((1 + tem) / (1 + cfg.infl / 100) - 1) * 100;
+    out('real', pct(real, 2));
+    out('realtxt', `Comparando una tasa mensual de ${pct(tem * 100, 2, false)} con la inflación de ${monthYear(cfg.inflMes, true)} (${pct(cfg.infl, 1, false)}). ${real >= 0 ? 'Le ganaría a la inflación si se mantiene ese ritmo.' : 'Perdería contra la inflación si se mantiene ese ritmo.'}`);
+  }
+  banco.addEventListener('change', () => {
+    tna.value = (Number(banco.value) * 100).toFixed(2).replace('.', ',');
+    calc();
+  });
+  [monto, dias, tna].forEach((i) => i.addEventListener('input', calc));
+  document.addEventListener('golong:dollars', (e) => {
+    const m = (e as CustomEvent).detail.mep;
+    if (m) {
+      cfg.mep = m.venta;
+      calc();
+    }
+  });
+  calc();
+</script>

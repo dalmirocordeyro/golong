@@ -1,0 +1,188 @@
+---
+import Base from '../layouts/Base.astro';
+import QuoteCard from '../components/QuoteCard.astro';
+import MiniDollar from '../components/MiniDollar.astro';
+import LineChart from '../components/LineChart.astro';
+import StatTile from '../components/StatTile.astro';
+import Delta from '../components/Delta.astro';
+import Price from '../components/Price.astro';
+import MarketList from '../components/MarketList.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import { getSiteData } from '../lib/data';
+import { brecha, brechaHistory, breadth, lastDays } from '../lib/derived';
+import { renderSparkline } from '../lib/chart';
+import { monthYear, num, pct } from '../lib/format';
+import { SITE } from '../site.config';
+
+const data = await getSiteData();
+const d = data.dollars;
+const b = breadth(data);
+const topPanel = [...b.rows].sort((x, y) => y.monto - x.monto).slice(0, 5);
+const bondsTop = ['AL30', 'GD30', 'AL35', 'GD35', 'AE38'].map((s) => data.bonds.find((x) => x.symbol === s)).filter((x) => !!x);
+const cedTop = ['SPY', 'QQQ', 'AAPL', 'NVDA', 'MELI'].map((s) => data.cedears.find((x) => x.symbol === s)).filter((x) => !!x);
+const cryptoTop = data.crypto.filter((c) => ['bitcoin', 'ethereum', 'solana', 'ripple'].includes(c.id));
+const brechaBlueHist = lastDays(brechaHistory(d, 'blue'), 365);
+const bestPf = data.plazoFijo[0];
+const inf = data.inflacion;
+
+const faq = [
+  {
+    q: '¿Cada cuánto se actualiza la cotización del dólar?',
+    a: '<p>Mientras tenés la página abierta, los precios del dólar se vuelven a consultar cada minuto y las criptomonedas cada dos minutos, sin recargar. El resto de los datos (acciones, bonos, riesgo país e inflación) se actualiza varias veces por hora. Cada valor muestra cuándo fue su última actualización.</p>',
+  },
+  {
+    q: '¿Qué es la brecha cambiaria?',
+    a: '<p>Es la diferencia porcentual entre un dólar alternativo (blue, MEP, CCL o cripto) y el dólar oficial. Por ejemplo, si el oficial vale $1.000 y el blue $1.100, la brecha es del 10%. Se usa como termómetro de la presión sobre el tipo de cambio. <a href="/brecha">Ver la brecha y su historial</a>.</p>',
+  },
+  {
+    q: '¿Qué diferencia hay entre el dólar blue, el MEP y el CCL?',
+    a: '<p>El <strong>blue</strong> se opera en el mercado informal. El <strong>MEP</strong> (o dólar bolsa) se obtiene comprando un bono en pesos y vendiéndolo en dólares dentro del país, de forma legal. El <strong>CCL</strong> (contado con liquidación) funciona igual pero los dólares quedan en una cuenta del exterior. Cada uno tiene su página con historial y explicación.</p>',
+  },
+  {
+    q: '¿De dónde salen los datos?',
+    a: `<p>De APIs públicas y gratuitas: DolarApi y ArgentinaDatos para dólar, riesgo país, inflación y plazos fijos; data912 para acciones, bonos y CEDEARs; y CoinGecko para criptomonedas. El detalle está en <a href="/fuentes">Fuentes de datos</a>. ${SITE.name} no opera ni vende divisas.</p>`,
+  },
+];
+---
+<Base
+  title={`Dólar hoy en Argentina: blue, oficial, MEP y CCL en vivo | ${SITE.name}`}
+  rawTitle
+  description="Cotización del dólar blue, oficial, MEP, CCL, cripto y tarjeta en vivo. Brecha cambiaria, riesgo país, inflación, Merval, bonos, CEDEARs y cripto en un solo lugar."
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE.name,
+      url: SITE.url,
+      description: SITE.description,
+      inLanguage: 'es-AR',
+      author: { '@type': 'Person', name: SITE.author.name, url: `${SITE.url}/sobre-mi` },
+    },
+  ]}
+>
+  <section class="page-head">
+    <h1>Dólar hoy en Argentina</h1>
+    <div class="status-line">
+      <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
+      <span>Precios de venta · se actualizan solos cada minuto</span>
+    </div>
+  </section>
+
+  <div class="hero">
+    <QuoteCard d={d.blue} />
+    <QuoteCard d={d.oficial} />
+    <article class="card quote-card brecha-card">
+      <div class="top">
+        <h2 class="mt-0"><a href="/brecha">Brecha cambiaria</a></h2>
+        <span class="muted" style="font-size:.8rem">vs. oficial</span>
+      </div>
+      <div>
+        <div class="muted" style="font-size:.8rem;margin-bottom:4px">Blue</div>
+        <span class="big num" data-live="brecha:blue">{pct(brecha(d, 'blue'), 1, false)}</span>
+      </div>
+      <div class="brecha-list">
+        {(['mep', 'ccl', 'cripto'] as const).map((s) => (
+          <div class="brecha-row">
+            <span class="lbl">{d[s].nombre}</span>
+            <span class="val" data-live={`brecha:${s}`}>{pct(brecha(d, s), 1, false)}</span>
+          </div>
+        ))}
+      </div>
+      <div class="spark-box" set:html={renderSparkline(brechaBlueHist, 300, 44, 1)} aria-hidden="true" />
+      <div class="foot">
+        <span class="updated">Brecha blue, último año</span>
+        <a href="/brecha" style="font-size:.84rem;font-weight:600">Ver historial →</a>
+      </div>
+    </article>
+  </div>
+
+  <AdSlot slot="top" height={100} />
+
+  <section class="section" aria-labelledby="todas">
+    <div class="section-head">
+      <h2 id="todas">Otras cotizaciones</h2>
+      <a class="more" href="/dolar">Comparar todas →</a>
+    </div>
+    <div class="grid g-4">
+      {(['mep', 'ccl', 'cripto', 'tarjeta', 'mayorista'] as const).map((s) => (
+        <MiniDollar d={d[s]} brecha={['mep', 'ccl', 'cripto'].includes(s) ? brecha(d, s) : null} />
+      ))}
+    </div>
+  </section>
+
+  <section class="section grid g-main">
+    <LineChart
+      title="Dólar blue vs. oficial"
+      label="Evolución del precio de venta del dólar blue y del dólar oficial"
+      series={[
+        { key: 'blue', label: 'Blue', slot: 1, points: d.blue.history },
+        { key: 'oficial', label: 'Oficial', slot: 2, points: d.oficial.history },
+      ]}
+      format="ars"
+      range="3m"
+      area={false}
+      statsLabels={{ chg: 'Variación del blue' }}
+    />
+    <div class="grid" style="align-content:start">
+      <StatTile label="Riesgo país" href="/riesgo-pais" spark={renderSparkline(lastDays(data.riesgo.history, 90), 300, 36, 1)} note={`Puntos básicos · EMBI de JP Morgan`}>
+        <Delta slot="delta" value={data.riesgo.varPts} mode="pts" />
+        {num(data.riesgo.valor, 0)} <small>pts</small>
+      </StatTile>
+      <StatTile label={`Inflación de ${monthYear(inf.ultimo[0], true)}`} href="/inflacion" note={`Interanual ${pct(inf.ultimoInteranual[1], 1, false)} · Acumulada ${inf.ultimo[0].slice(0, 4)} ${pct(inf.acumuladoAnio, 1, false)}`}>
+        {pct(inf.ultimo[1], 1, false)} <small>mensual</small>
+      </StatTile>
+      {bestPf && (
+        <StatTile label="Mejor plazo fijo (TNA)" href="/herramientas/plazo-fijo" note={`${bestPf.entidad} · ¿Le gana al dólar? <b>Calculalo</b>`}>
+          {pct(bestPf.tna * 100, 1, false)} <small>anual</small>
+        </StatTile>
+      )}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="mercados">
+    <div class="section-head">
+      <div>
+        <h2 id="mercados">Mercados</h2>
+        <p>Precios con demora. Montos en pesos salvo indicación.</p>
+      </div>
+    </div>
+    <div class="grid g-markets">
+      <article class="card">
+        <div class="flex between"><h3 class="mt-0">Panel líder</h3><a href="/mercado/acciones" style="font-size:.84rem;font-weight:600">Ver todas →</a></div>
+        <div class="breadth" role="img" aria-label={`${b.up} suben, ${b.flat} sin cambios, ${b.down} bajan`}>
+          <i class="u" style={`flex:${b.up}`}></i><i class="f" style={`flex:${b.flat}`}></i><i class="d" style={`flex:${b.down}`}></i>
+        </div>
+        <div class="breadth-lbl"><span class="t-up">▲ {b.up} suben</span><span>{b.flat} =</span><span class="t-down">{b.down} bajan ▼</span></div>
+        <MarketList rows={topPanel} href="/mercado/acciones" />
+      </article>
+      <article class="card">
+        <div class="flex between"><h3 class="mt-0">Bonos soberanos</h3><a href="/mercado/bonos" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
+        <p class="muted mt-1" style="font-size:.8rem;margin-bottom:0">Precio en dólares cada 100 nominales</p>
+        <MarketList rows={bondsTop.map((x) => ({ ...x, price: x.priceUsd ?? x.price, pct: x.pctUsd ?? x.pct }))} cur="US$" href="/mercado/bonos" />
+      </article>
+      <article class="card">
+        <div class="flex between"><h3 class="mt-0">CEDEARs</h3><a href="/mercado/cedears" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
+        <p class="muted mt-1" style="font-size:.8rem;margin-bottom:0">Precio en pesos por certificado</p>
+        <MarketList rows={cedTop} href="/mercado/cedears" />
+      </article>
+      <article class="card">
+        <div class="flex between"><h3 class="mt-0">Cripto</h3><a href="/cripto" style="font-size:.84rem;font-weight:600">Ver todas →</a></div>
+        <p class="muted mt-1" style="font-size:.8rem;margin-bottom:0">Precio en dólares, variación 24 h</p>
+        <div class="movers">
+          {cryptoTop.map((c) => (
+            <a href="/cripto">
+              <span class="sym">{c.symbol} <small class="muted" style="font-weight:450">{c.name}</small></span>
+              <span class="px"><Price value={c.price} cur="US$" live={`c:${c.id}:price`} /></span>
+              <Delta value={c.pct24h} live={`c:${c.id}:pct24h`} />
+            </a>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <AdSlot slot="inline" />
+
+  <Faq items={faq} />
+</Base>

@@ -1,0 +1,65 @@
+---
+import { SITE } from '../site.config';
+import Logo from './Logo.astro';
+import Updated from './Updated.astro';
+interface Props { generatedAt: string }
+const { generatedAt } = Astro.props;
+const year = new Date(generatedAt).getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <Logo size={22} />
+        <p>{SITE.tagline}. Datos públicos, actualizados durante el día, en un solo lugar y sin vueltas.</p>
+        <Updated iso={generatedAt} prefix="Datos generados " />
+      </div>
+      <div>
+        <h3>Dólar</h3>
+        <ul>
+          <li><a href="/dolar/blue">Dólar blue</a></li>
+          <li><a href="/dolar/oficial">Dólar oficial</a></li>
+          <li><a href="/dolar/mep">Dólar MEP</a></li>
+          <li><a href="/dolar/ccl">Dólar CCL</a></li>
+          <li><a href="/dolar/cripto">Dólar cripto</a></li>
+          <li><a href="/dolar/tarjeta">Dólar tarjeta</a></li>
+          <li><a href="/brecha">Brecha cambiaria</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Mercados</h3>
+        <ul>
+          <li><a href="/mercado/acciones">Acciones del Merval</a></li>
+          <li><a href="/mercado/bonos">Bonos soberanos</a></li>
+          <li><a href="/mercado/cedears">CEDEARs</a></li>
+          <li><a href="/mercado/adrs">ADRs argentinos</a></li>
+          <li><a href="/cripto">Criptomonedas</a></li>
+          <li><a href="/riesgo-pais">Riesgo país</a></li>
+          <li><a href="/inflacion">Inflación</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Herramientas</h3>
+        <ul>
+          <li><a href="/herramientas/conversor">Conversor de monedas</a></li>
+          <li><a href="/herramientas/plazo-fijo">Plazo fijo vs dólar</a></li>
+        </ul>
+        <h3 class="mt-3">El sitio</h3>
+        <ul>
+          <li><a href="/sobre-mi">Sobre mí</a></li>
+          <li><a href="/fuentes">Fuentes de datos</a></li>
+          <li><a href="/contacto">Contacto</a></li>
+          <li><a href="/privacidad">Privacidad</a></li>
+          <li><a href="/terminos">Términos</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="disclaimer">
+      La información es solo informativa, proviene de fuentes públicas de terceros y puede tener demoras o errores. No es asesoramiento financiero. Antes de invertir, consultá con un profesional.
+    </p>
+    <div class="footer-bottom">
+      <span>© {year} {SITE.name}</span>
+      <span>Hecho por <a href="/sobre-mi" rel="author">{SITE.author.name}</a></span>
+    </div>
+  </div>
+</footer>

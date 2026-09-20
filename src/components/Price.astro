@@ -1,0 +1,22 @@
+---
+import { price, splitPrice } from '../lib/format';
+interface Props {
+  value: number | null;
+  cur?: '$' | 'US$' | '';
+  size?: 'big' | 'mid' | 'plain';
+  decimals?: number;
+  live?: string;
+  class?: string;
+}
+const { value, cur = '$', size = 'plain', decimals, live, class: cls } = Astro.props;
+const parts = value != null && size !== 'plain' ? splitPrice(value, decimals ?? 2) : null;
+---
+{
+  size === 'plain' ? (
+    <span class:list={['num', cls]} data-live={live} data-fmt="plain" data-cur={cur}>{value == null ? '—' : `${cur}${price(value, decimals)}`}</span>
+  ) : (
+    <span class:list={[size, 'num', cls]} data-live={live} data-fmt={size} data-cur={cur}>
+      {cur && <span class="cur">{cur}</span>}{parts ? parts.int : '—'}{parts?.dec && <span class="dec">{parts.dec}</span>}
+    </span>
+  )
+}

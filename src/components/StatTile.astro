@@ -1,0 +1,12 @@
+---
+interface Props { label: string; href?: string; note?: string; spark?: string }
+const { label, href, note, spark } = Astro.props;
+---
+<article class="card stat">
+  <div class="label"><span>{label}</span><slot name="delta" /></div>
+  <div class="value"><slot /></div>
+  {spark && <div set:html={spark} aria-hidden="true" />}
+  {note && <div class="note" set:html={note} />}
+  <slot name="extra" />
+  {href && <a class="cover" href={href} aria-label={label}></a>}
+</article>

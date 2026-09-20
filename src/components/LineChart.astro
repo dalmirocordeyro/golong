@@ -1,0 +1,72 @@
+---
+import { renderLineChart, fmtValue, type Series, type ValueFormat } from '../lib/chart';
+import { RANGES, rangeStats, sliceRange, type RangeId } from '../lib/series';
+import { dmy, num, pct } from '../lib/format';
+
+interface Props {
+  series: Series[];
+  format: ValueFormat;
+  /** Texto accesible que describe el gráfico */
+  label: string;
+  range?: RangeId;
+  ranges?: RangeId[] | false;
+  area?: boolean;
+  refLine?: number | null;
+  height?: number;
+  stats?: boolean;
+  statsLabels?: { chg?: string };
+  title?: string;
+  subtitle?: string;
+}
+const {
+  series, format, label, range = '1a', ranges = ['1m', '3m', '6m', '1a', '5a'], area = true, refLine = null,
+  height = 280, stats = true, statsLabels = {}, title, subtitle,
+} = Astro.props;
+
+const available = ranges ? RANGES.filter((r) => (ranges as string[]).includes(r.id)) : [];
+const days = RANGES.find((r) => r.id === range)?.days ?? 366;
+const view = series.map((s) => ({ ...s, points: sliceRange(s.points, days) }));
+const svg = renderLineChart({ series: view, width: 800, height, format, area, refLine });
+const st = rangeStats(view[0]?.points ?? []);
+const chg = st
+  ? format === 'pct' || format === 'pts'
+    ? `${st.changeAbs >= 0 ? '+' : ''}${num(st.changeAbs, format === 'pts' ? 0 : 1)}${format === 'pct' ? ' pp' : ' pts'}`
+    : pct(st.changePct)
+  : '—';
+const cfg = { type: 'line', series, format, area, refLine, height, range };
+const json = JSON.stringify(cfg).replace(/</g, '\\u003c');
+---
+<div class="card chart-card" data-chart>
+  {(title || available.length > 0 || series.length > 1) && (
+    <div class="chart-toolbar">
+      <div>
+        {title && <h2>{title}</h2>}
+        {subtitle && <p class="muted mt-0" style="font-size:.86rem;margin-top:2px">{subtitle}</p>}
+        {series.length > 1 && (
+          <div class="legend" style={title ? 'margin-top:8px' : ''}>
+            {series.map((s) => <span class={`s${s.slot}`}><i></i>{s.label}</span>)}
+          </div>
+        )}
+      </div>
+      {available.length > 0 && (
+        <div class="seg" role="group" aria-label="Período del gráfico">
+          {available.map((r) => <button type="button" data-range={r.id} aria-pressed={r.id === range ? 'true' : 'false'}>{r.label}</button>)}
+        </div>
+      )}
+    </div>
+  )}
+  <div class="chart" tabindex="0" role="img" aria-label={`${label}. Usá las flechas para recorrer los valores.`} set:html={svg} />
+  {stats && st && (
+    <div class="chart-stats" data-chart-stats>
+      <div><span>{statsLabels.chg ?? 'Variación del período'}</span><b data-k="chg">{chg}</b></div>
+      <div><span>Máximo · <span data-k="maxd">{dmy(st.max[0])}</span></span><b data-k="max">{fmtValue(st.max[1], format)}</b></div>
+      <div><span>Mínimo · <span data-k="mind">{dmy(st.min[0])}</span></span><b data-k="min">{fmtValue(st.min[1], format)}</b></div>
+      <div><span>Al inicio del período</span><b data-k="first">{fmtValue(st.first, format)}</b></div>
+    </div>
+  )}
+  <script type="application/json" set:html={json} />
+</div>
+
+<script>
+  import '../scripts/charts';
+</script>
