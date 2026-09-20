@@ -15,7 +15,7 @@ Hecho por Dalmiro Cordeyro.
 | `/brecha` | Brecha contra el oficial con historial | calculada |
 | `/riesgo-pais` | EMBI con historial desde 1999 | ArgentinaDatos |
 | `/inflacion` | Mensual, interanual, acumulada, gráficos y tabla | ArgentinaDatos (INDEC) |
-| `/mercado/*` | Acciones (panel líder y general), bonos (con MEP implícito), CEDEARs, ADRs | data912 |
+| `/acciones`, `/bonos`, `/cedears`, `/adrs` | Acciones (panel líder y general), bonos (con MEP implícito), CEDEARs, ADRs | data912 |
 | `/cripto` | Top 10 en dólares y en pesos | CoinGecko |
 | `/herramientas/*` | Conversor y calculadora de plazo fijo vs. dólar e inflación | varias |
 | `/sobre-mi`, `/fuentes`, `/contacto`, `/privacidad`, `/terminos` | Páginas que pide AdSense y que ayudan a que Google te asocie con el sitio | — |
@@ -67,6 +67,8 @@ git push -u origin main
 4. En GitHub: pestaña **Actions** → *Actualizar y publicar* → **Run workflow**.
 
 En 2 o 3 minutos el sitio queda online en `https://golong.<tu-subdominio>.workers.dev`. Desde ahí se actualiza solo.
+
+> Mientras el sitio esté en `*.workers.dev`, se publica con `noindex` y `robots.txt` bloqueando buscadores: así Google no indexa la dirección temporal y después no hay contenido duplicado al pasar al dominio propio. Se desactiva solo cuando borrás la variable `SITE_URL`.
 
 ### 4. Dominio propio
 

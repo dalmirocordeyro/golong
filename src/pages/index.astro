@@ -149,22 +149,22 @@ const faq = [
     </div>
     <div class="grid g-markets">
       <article class="card">
-        <div class="flex between"><h3 class="mt-0">Panel líder</h3><a href="/mercado/acciones" style="font-size:.84rem;font-weight:600">Ver todas →</a></div>
+        <div class="flex between"><h3 class="mt-0">Panel líder</h3><a href="/acciones" style="font-size:.84rem;font-weight:600">Ver todas →</a></div>
         <div class="breadth" role="img" aria-label={`${b.up} suben, ${b.flat} sin cambios, ${b.down} bajan`}>
           <i class="u" style={`flex:${b.up}`}></i><i class="f" style={`flex:${b.flat}`}></i><i class="d" style={`flex:${b.down}`}></i>
         </div>
         <div class="breadth-lbl"><span class="t-up">▲ {b.up} suben</span><span>{b.flat} =</span><span class="t-down">{b.down} bajan ▼</span></div>
-        <MarketList rows={topPanel} href="/mercado/acciones" />
+        <MarketList rows={topPanel} href="/acciones" />
       </article>
       <article class="card">
-        <div class="flex between"><h3 class="mt-0">Bonos soberanos</h3><a href="/mercado/bonos" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
+        <div class="flex between"><h3 class="mt-0">Bonos soberanos</h3><a href="/bonos" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
         <p class="muted mt-1" style="font-size:.8rem;margin-bottom:0">Precio en dólares cada 100 nominales</p>
-        <MarketList rows={bondsTop.map((x) => ({ ...x, price: x.priceUsd ?? x.price, pct: x.pctUsd ?? x.pct }))} cur="US$" href="/mercado/bonos" />
+        <MarketList rows={bondsTop.map((x) => ({ ...x, price: x.priceUsd ?? x.price, pct: x.pctUsd ?? x.pct }))} cur="US$" href="/bonos" />
       </article>
       <article class="card">
-        <div class="flex between"><h3 class="mt-0">CEDEARs</h3><a href="/mercado/cedears" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
+        <div class="flex between"><h3 class="mt-0">CEDEARs</h3><a href="/cedears" style="font-size:.84rem;font-weight:600">Ver todos →</a></div>
         <p class="muted mt-1" style="font-size:.8rem;margin-bottom:0">Precio en pesos por certificado</p>
-        <MarketList rows={cedTop} href="/mercado/cedears" />
+        <MarketList rows={cedTop} href="/cedears" />
       </article>
       <article class="card">
         <div class="flex between"><h3 class="mt-0">Cripto</h3><a href="/cripto" style="font-size:.84rem;font-weight:600">Ver todas →</a></div>

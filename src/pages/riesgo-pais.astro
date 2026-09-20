@@ -54,7 +54,7 @@ const faq = [
     <h2 class="mt-0">¿Cómo leer el riesgo país?</h2>
     <p>El riesgo país muestra cuánto más rendimiento exigen los inversores a los bonos argentinos en dólares en comparación con los bonos de Estados Unidos, que se consideran libres de riesgo. Un valor de {num(r.valor, 0)} puntos significa que, en promedio, la deuda argentina paga unos {num(r.valor / 100, 1)} puntos porcentuales más de tasa por año.</p>
     {all && <p>En la serie disponible, el valor más alto fue de <strong>{num(all.max[1], 0)} puntos</strong> ({dmy(all.max[0])}) y el más bajo de <strong>{num(all.min[1], 0)} puntos</strong> ({dmy(all.min[0])}).</p>}
-    <p>Se mueve en sentido contrario al precio de los bonos: cuando los <a href="/mercado/bonos">bonos soberanos</a> suben, el riesgo país baja. También influye la situación global: si suben las tasas en Estados Unidos o hay aversión al riesgo, los países emergentes suelen verse afectados.</p>
+    <p>Se mueve en sentido contrario al precio de los bonos: cuando los <a href="/bonos">bonos soberanos</a> suben, el riesgo país baja. También influye la situación global: si suben las tasas en Estados Unidos o hay aversión al riesgo, los países emergentes suelen verse afectados.</p>
   </section>
 
   <Faq items={faq} />

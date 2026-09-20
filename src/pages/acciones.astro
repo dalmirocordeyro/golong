@@ -1,15 +1,15 @@
 ---
-import Base from '../../layouts/Base.astro';
-import DataTable, { type Column } from '../../components/DataTable.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
-import Updated from '../../components/Updated.astro';
-import { getSiteData } from '../../lib/data';
-import { breadth } from '../../lib/derived';
-import { compact, pct, price } from '../../lib/format';
-import { deltaHtml, escapeHtml } from '../../lib/html';
-import type { Quote } from '../../lib/types';
-import { STOCK_NAMES } from '../../content/names';
+import Base from '../layouts/Base.astro';
+import DataTable, { type Column } from '../components/DataTable.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import Updated from '../components/Updated.astro';
+import { getSiteData } from '../lib/data';
+import { breadth } from '../lib/derived';
+import { compact, pct, price } from '../lib/format';
+import { deltaHtml, escapeHtml } from '../lib/html';
+import type { Quote } from '../lib/types';
+import { STOCK_NAMES } from '../content/names';
 
 const data = await getSiteData();
 const b = breadth(data);
@@ -31,7 +31,7 @@ const faq = [
   { q: '¿Los precios son en tiempo real?', a: '<p>No. Los precios pueden tener una demora de varios minutos respecto del mercado. Para operar, consultá siempre a tu broker.</p>' },
 ];
 ---
-<Base title="Acciones del Merval hoy: panel líder y panel general" description="Cotización de las acciones argentinas hoy: panel líder del Merval y panel general con precio, variación diaria y monto operado." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'Acciones', href: '/mercado/acciones' }]}>
+<Base title="Acciones del Merval hoy: panel líder y panel general" description="Cotización de las acciones argentinas hoy: panel líder del Merval y panel general con precio, variación diaria y monto operado." crumbs={[{ label: 'Acciones', href: '/acciones' }]}>
   <section class="page-head">
     <h1>Acciones argentinas hoy</h1>
     <p class="lead">Panel líder y panel general de BYMA. Precios en pesos con demora.</p>

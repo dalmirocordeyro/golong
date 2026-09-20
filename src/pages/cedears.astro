@@ -1,14 +1,14 @@
 ---
-import Base from '../../layouts/Base.astro';
-import DataTable, { type Column } from '../../components/DataTable.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
-import Updated from '../../components/Updated.astro';
-import { getSiteData } from '../../lib/data';
-import { compact, price } from '../../lib/format';
-import { deltaHtml, escapeHtml } from '../../lib/html';
-import { CEDEAR_NAMES } from '../../content/names';
-import type { Quote } from '../../lib/types';
+import Base from '../layouts/Base.astro';
+import DataTable, { type Column } from '../components/DataTable.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import Updated from '../components/Updated.astro';
+import { getSiteData } from '../lib/data';
+import { compact, price } from '../lib/format';
+import { deltaHtml, escapeHtml } from '../lib/html';
+import { CEDEAR_NAMES } from '../content/names';
+import type { Quote } from '../lib/types';
 
 const data = await getSiteData();
 const etfs = new Set(['SPY', 'QQQ', 'DIA', 'IWM', 'EWZ', 'GLD', 'SLV', 'ARKK']);
@@ -23,7 +23,7 @@ const faq = [
   { q: '¿Por qué un CEDEAR sube aunque la acción no se mueva?', a: '<p>Porque su precio en pesos depende de dos cosas: el precio de la acción en dólares y el tipo de cambio implícito (CCL). Si el dólar CCL sube, el CEDEAR en pesos también sube.</p>' },
 ];
 ---
-<Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de los CEDEARs más operados hoy en pesos: SPY, QQQ, Apple, Nvidia, Mercado Libre y más, con variación diaria y monto operado." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'CEDEARs', href: '/mercado/cedears' }]}>
+<Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de los CEDEARs más operados hoy en pesos: SPY, QQQ, Apple, Nvidia, Mercado Libre y más, con variación diaria y monto operado." crumbs={[{ label: 'CEDEARs', href: '/cedears' }]}>
   <section class="page-head">
     <h1>CEDEARs hoy</h1>
     <p class="lead">Acciones y ETFs del exterior que cotizan en pesos en BYMA. Precios por certificado, con demora.</p>

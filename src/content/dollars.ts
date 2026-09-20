@@ -61,7 +61,7 @@ export const DOLLAR_CONTENT: Record<DollarSlug, DollarContent> = {
       <p>MEP significa <em>Mercado Electrónico de Pagos</em>. También se lo llama "dólar bolsa". Es una forma legal de comprar dólares: comprás un bono (por ejemplo, el AL30) en pesos y lo vendés en su versión en dólares (AL30D). Los dólares quedan en tu cuenta de inversión y los podés transferir a tu cuenta bancaria.</p>
       <p>Se puede hacer desde el home banking de muchos bancos o desde cualquier broker (ALyC). Según la normativa vigente puede haber plazos mínimos de tenencia entre la compra y la venta del bono.</p>
       <h3>¿Cómo se calcula?</h3>
-      <p>Dividiendo el precio del bono en pesos por su precio en dólares. Por eso cada bono tiene su propio "MEP implícito"; en la página de <a href="/mercado/bonos">bonos</a> lo mostramos para cada uno. La cotización de esta página es una referencia de mercado.</p>`,
+      <p>Dividiendo el precio del bono en pesos por su precio en dólares. Por eso cada bono tiene su propio "MEP implícito"; en la página de <a href="/bonos">bonos</a> lo mostramos para cada uno. La cotización de esta página es una referencia de mercado.</p>`,
     faq: [
       { q: '¿Es legal comprar dólar MEP?', a: '<p>Sí. Es una operación de mercado de capitales regulada por la CNV y se hace a través de bancos o brokers registrados.</p>' },
       { q: '¿Qué diferencia hay entre el MEP y el CCL?', a: '<p>El mecanismo es parecido, pero con el MEP los dólares quedan en una cuenta en Argentina. Con el <a href="/dolar/ccl">contado con liquidación</a> se acreditan en una cuenta del exterior.</p>' },
@@ -77,7 +77,7 @@ export const DOLLAR_CONTENT: Record<DollarSlug, DollarContent> = {
       <p>El <em>contado con liquidación</em> es la operación que permite pasar pesos a dólares depositados en una cuenta del exterior. Funciona como el <a href="/dolar/mep">MEP</a>: se compra un activo en pesos (un bono o una acción que también cotiza afuera) y se vende en dólares, pero liquidándolo en el exterior.</p>
       <p>Lo usan principalmente empresas e inversores que necesitan dólares fuera del país. Por eso suele cotizar un poco por encima del MEP.</p>
       <h3>CCL implícito en ADRs y CEDEARs</h3>
-      <p>Como muchas empresas argentinas cotizan en Buenos Aires y en Nueva York (<a href="/mercado/adrs">ADRs</a>), comparar ambos precios permite calcular un CCL implícito. Lo mismo pasa con los <a href="/mercado/cedears">CEDEARs</a>.</p>`,
+      <p>Como muchas empresas argentinas cotizan en Buenos Aires y en Nueva York (<a href="/adrs">ADRs</a>), comparar ambos precios permite calcular un CCL implícito. Lo mismo pasa con los <a href="/cedears">CEDEARs</a>.</p>`,
     faq: [
       { q: '¿Quién puede operar CCL?', a: '<p>Cualquier persona con una cuenta en un broker local y una cuenta en el exterior donde recibir los dólares, respetando la normativa vigente.</p>' },
       { q: '¿Por qué el CCL es más caro que el MEP?', a: '<p>Porque los dólares quedan fuera del sistema argentino, algo que muchos inversores y empresas valoran más.</p>' },

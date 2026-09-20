@@ -1,21 +1,21 @@
 ---
 import Logo from './Logo.astro';
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/(index)?$/, '') || '/';
 
 const main = [
   { href: '/dolar', label: 'Dólar' },
   { href: '/brecha', label: 'Brecha' },
   { href: '/riesgo-pais', label: 'Riesgo país' },
   { href: '/inflacion', label: 'Inflación' },
-  { href: '/mercado/acciones', label: 'Acciones' },
-  { href: '/mercado/bonos', label: 'Bonos' },
-  { href: '/mercado/cedears', label: 'CEDEARs' },
+  { href: '/acciones', label: 'Acciones' },
+  { href: '/bonos', label: 'Bonos' },
+  { href: '/cedears', label: 'CEDEARs' },
   { href: '/cripto', label: 'Cripto' },
   { href: '/herramientas/conversor', label: 'Conversor' },
 ];
 const mobile = [
   ...main.slice(0, 7),
-  { href: '/mercado/adrs', label: 'ADRs' },
+  { href: '/adrs', label: 'ADRs' },
   { href: '/cripto', label: 'Cripto' },
   { href: '/herramientas/conversor', label: 'Conversor' },
   { href: '/herramientas/plazo-fijo', label: 'Plazo fijo' },

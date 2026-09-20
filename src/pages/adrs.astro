@@ -1,14 +1,14 @@
 ---
-import Base from '../../layouts/Base.astro';
-import DataTable, { type Column } from '../../components/DataTable.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
-import Updated from '../../components/Updated.astro';
-import { getSiteData } from '../../lib/data';
-import { compact, price } from '../../lib/format';
-import { deltaHtml, escapeHtml } from '../../lib/html';
-import { ADR_NAMES } from '../../content/names';
-import type { Quote } from '../../lib/types';
+import Base from '../layouts/Base.astro';
+import DataTable, { type Column } from '../components/DataTable.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import Updated from '../components/Updated.astro';
+import { getSiteData } from '../lib/data';
+import { compact, price } from '../lib/format';
+import { deltaHtml, escapeHtml } from '../lib/html';
+import { ADR_NAMES } from '../content/names';
+import type { Quote } from '../lib/types';
 
 const data = await getSiteData();
 const cols: Column<Quote>[] = [
@@ -22,7 +22,7 @@ const faq = [
   { q: '¿Por qué miran los ADRs cuando la bolsa porteña está cerrada?', a: '<p>Porque Wall Street opera en otro horario y en días que en Argentina pueden ser feriado. Los ADRs anticipan cómo puede abrir el mercado local.</p>' },
 ];
 ---
-<Base title="ADRs argentinos hoy: YPF, Galicia y más en Wall Street" description="Cotización de los ADRs argentinos hoy en Nueva York: YPF, Grupo Galicia, Pampa, Mercado Libre, Globant, Vista y más, con variación diaria." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'ADRs', href: '/mercado/adrs' }]}>
+<Base title="ADRs argentinos hoy: YPF, Galicia y más en Wall Street" description="Cotización de los ADRs argentinos hoy en Nueva York: YPF, Grupo Galicia, Pampa, Mercado Libre, Globant, Vista y más, con variación diaria." crumbs={[{ label: 'ADRs', href: '/adrs' }]}>
   <section class="page-head">
     <h1>ADRs argentinos hoy</h1>
     <p class="lead">Empresas argentinas (y latinoamericanas con fuerte presencia local) que cotizan en Wall Street. Precios en dólares, con demora.</p>

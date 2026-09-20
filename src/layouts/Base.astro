@@ -19,9 +19,12 @@ interface Props {
 }
 const { title, description = SITE.description, crumbs = [], jsonLd = [], noindex = false, rawTitle = false } = Astro.props;
 const data = await getSiteData();
-const path = Astro.url.pathname;
+// URL limpia, sin ".html" (el hosting sirve /bonos para bonos.html)
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/') || '/';
 const canonical = new URL(path, SITE.url).href;
 const fullTitle = rawTitle ? title : `${title} | ${SITE.name}`;
+// En la dirección temporal (*.workers.dev) no queremos que Google indexe: evita contenido duplicado al mudar al dominio.
+const isPreview = SITE.url.includes('.workers.dev');
 const ogImage = new URL('/og.png', SITE.url).href;
 
 const ld: Record<string, unknown>[] = [...jsonLd];
@@ -44,7 +47,7 @@ const json = (o: unknown) => JSON.stringify(o).replace(/</g, '\\u003c');
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {(noindex || isPreview) && <meta name="robots" content="noindex" />}
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f4f1" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

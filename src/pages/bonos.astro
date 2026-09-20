@@ -1,16 +1,16 @@
 ---
-import Base from '../../layouts/Base.astro';
-import DataTable, { type Column } from '../../components/DataTable.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
-import StatTile from '../../components/StatTile.astro';
-import Delta from '../../components/Delta.astro';
-import Updated from '../../components/Updated.astro';
-import { getSiteData } from '../../lib/data';
-import { compact, num, price } from '../../lib/format';
-import { deltaHtml, escapeHtml } from '../../lib/html';
-import { BOND_NAMES } from '../../lib/sources';
-import type { Bond, Quote } from '../../lib/types';
+import Base from '../layouts/Base.astro';
+import DataTable, { type Column } from '../components/DataTable.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Faq from '../components/Faq.astro';
+import StatTile from '../components/StatTile.astro';
+import Delta from '../components/Delta.astro';
+import Updated from '../components/Updated.astro';
+import { getSiteData } from '../lib/data';
+import { compact, num, price } from '../lib/format';
+import { deltaHtml, escapeHtml } from '../lib/html';
+import { BOND_NAMES } from '../lib/sources';
+import type { Bond, Quote } from '../lib/types';
 
 const data = await getSiteData();
 const mepVals = data.bonds.map((b) => b.mep).filter((x): x is number => x != null);
@@ -38,7 +38,7 @@ const faq = [
   { q: '¿Qué es el MEP implícito de un bono?', a: '<p>Es el tipo de cambio que surge de dividir el precio del bono en pesos por su precio en dólares. Muestra a qué dólar estarías comprando si hacés la operación MEP con ese bono. <a href="/dolar/mep">Más sobre el dólar MEP</a>.</p>' },
 ];
 ---
-<Base title="Bonos argentinos hoy: AL30, GD30 y soberanos en dólares" description="Cotización de los bonos soberanos argentinos hoy: AL30, GD30, AL35, GD35, AE38 y más. Precio en dólares y en pesos, variación y MEP implícito." crumbs={[{ label: 'Mercados', href: '/mercado/acciones' }, { label: 'Bonos', href: '/mercado/bonos' }]}>
+<Base title="Bonos argentinos hoy: AL30, GD30 y soberanos en dólares" description="Cotización de los bonos soberanos argentinos hoy: AL30, GD30, AL35, GD35, AE38 y más. Precio en dólares y en pesos, variación y MEP implícito." crumbs={[{ label: 'Bonos', href: '/bonos' }]}>
   <section class="page-head">
     <h1>Bonos argentinos hoy</h1>
     <p class="lead">Bonos soberanos en dólares (Bonares y Globales) y títulos en pesos. Precios cada 100 nominales, con demora.</p>
