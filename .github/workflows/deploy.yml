@@ -41,20 +41,32 @@ jobs:
       - name: Generar sitio con datos actuales
         run: npm run build
 
-      # Si faltan los secrets, este paso falla y GitHub te avisa por mail.
-      # Antes se salteaba en silencio y el sitio quedaba con datos viejos.
+      # Si faltan las credenciales, este paso falla y dice cuál, en vez de
+      # saltear la publicación en silencio y dejar el sitio con datos viejos.
+      # El token va sí o sí como "secret"; el Account ID puede ir como secret
+      # o como variable (no es un dato sensible).
       - name: Revisar credenciales de Cloudflare
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
-            echo "::error::Faltan CLOUDFLARE_API_TOKEN y/o CLOUDFLARE_ACCOUNT_ID en Settings > Secrets and variables > Actions. Sin eso el sitio no se publica."
-            exit 1
+          falta=0
+          if [ -z "$CF_TOKEN" ]; then
+            echo "::error::Falta CLOUDFLARE_API_TOKEN. Cargalo en Settings > Secrets and variables > Actions, pestaña Secrets, con ese nombre exacto."
+            falta=1
           fi
+          if [ -z "$CF_ACCOUNT" ]; then
+            echo "::error::Falta CLOUDFLARE_ACCOUNT_ID. Puede ir como secret o como variable, con ese nombre exacto."
+            falta=1
+          fi
+          [ "$falta" = 0 ] || exit 1
+          echo "Credenciales presentes. Token de ${#CF_TOKEN} caracteres, cuenta ${CF_ACCOUNT:0:6}..."
 
       - name: Publicar en Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
 
       - name: Confirmar publicación
