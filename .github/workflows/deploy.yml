@@ -28,7 +28,6 @@ jobs:
     env:
       SITE_URL: ${{ vars.SITE_URL }}
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }} # opcional
-      HAS_CLOUDFLARE: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,14 +41,21 @@ jobs:
       - name: Generar sitio con datos actuales
         run: npm run build
 
+      # Si faltan los secrets, este paso falla y GitHub te avisa por mail.
+      # Antes se salteaba en silencio y el sitio quedaba con datos viejos.
+      - name: Revisar credenciales de Cloudflare
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "::error::Faltan CLOUDFLARE_API_TOKEN y/o CLOUDFLARE_ACCOUNT_ID en Settings > Secrets and variables > Actions. Sin eso el sitio no se publica."
+            exit 1
+          fi
+
       - name: Publicar en Cloudflare
-        if: env.HAS_CLOUDFLARE == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
 
-      - name: Aviso
-        if: env.HAS_CLOUDFLARE != 'true'
-        run: echo "::notice::Sitio generado OK. Falta cargar CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID en Settings > Secrets para publicarlo."
+      - name: Confirmar publicación
+        run: echo "::notice::Publicado. Los datos del sitio quedan con la fecha de este build."
