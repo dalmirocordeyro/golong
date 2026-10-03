@@ -103,7 +103,7 @@ async function updateDollars() {
       document.querySelectorAll<HTMLElement>(`[data-live-meter="brecha:${s}"]`).forEach((el) => (el.style.width = `${Math.max(0, Math.min(100, b))}%`));
     }
   }
-  document.dispatchEvent(new CustomEvent('golong:dollars', { detail: out }));
+  document.dispatchEvent(new CustomEvent('dolarahora:dollars', { detail: out }));
   markLive();
 }
 
@@ -121,7 +121,7 @@ async function updateCrypto() {
     all(`c:${c.id}:pct7d`).forEach((el) => setDelta(el, c.pct7d));
     all(`c:${c.id}:mcap`).forEach((el) => (el.textContent = `US$${num(c.mcap ?? 0, 0)}`));
   }
-  document.dispatchEvent(new CustomEvent('golong:crypto', { detail: rows }));
+  document.dispatchEvent(new CustomEvent('dolarahora:crypto', { detail: rows }));
   markLive();
 }
 

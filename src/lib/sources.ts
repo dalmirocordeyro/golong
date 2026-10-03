@@ -266,7 +266,7 @@ function buildLetras(rows: D912[]): Letra[] {
     .filter((r) => /^[ST]\d{2}[A-Z]\d$/.test(r.symbol) && r.c > 0 && !LETRA_INFO[r.symbol])
     .map((r) => r.symbol);
   if (faltan.length) {
-    console.warn(`[golong] letras sin datos de vencimiento (agregalas en src/content/letras.ts): ${faltan.join(', ')}`);
+    console.warn(`[DolarAhora] letras sin datos de vencimiento (agregalas en src/content/letras.ts): ${faltan.join(', ')}`);
   }
   return letras;
 }

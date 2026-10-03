@@ -1,7 +1,7 @@
 // Configuración de Cloudflare Workers (solo archivos estáticos: gratis y sin límite de visitas).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "golong",
+  "name": "dolarahora",
   "compatibility_date": "2026-09-01",
   "assets": {
     "directory": "./dist",

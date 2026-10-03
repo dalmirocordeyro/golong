@@ -4,10 +4,10 @@
 // ─────────────────────────────────────────────────────────────
 
 export const SITE = {
-  name: 'golong',
+  name: 'DolarAhora',
   /** Dominio final (sin https://). Cambialo cuando compres el tuyo. */
-  domain: 'golong.com.ar',
-  /** URL pública. Mientras no tengas dominio, podés definir SITE_URL (p. ej. https://golong.tu-usuario.workers.dev). */
+  domain: 'dolarahora.com.ar',
+  /** URL pública. Mientras no tengas dominio, podés definir SITE_URL (p. ej. https://dolarahora.tu-usuario.workers.dev). */
   get url(): string {
     const env = typeof process !== 'undefined' ? process.env?.SITE_URL : undefined;
     return (env || `https://${this.domain}`).replace(/\/$/, '');

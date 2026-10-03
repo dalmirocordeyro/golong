@@ -14,7 +14,7 @@ interface Props {
   crumbs?: { label: string; href: string }[];
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
-  /** Título ya completo (sin agregar " | golong") */
+  /** Título ya completo (sin agregar " | DolarAhora") */
   rawTitle?: boolean;
 }
 const { title, description = SITE.description, crumbs = [], jsonLd = [], noindex = false, rawTitle = false } = Astro.props;

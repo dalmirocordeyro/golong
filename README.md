@@ -1,4 +1,4 @@
-# golong
+# DolarAhora
 
 **Dólar hoy, riesgo país y mercados de Argentina.** Un sitio rápido, sin ventanas emergentes, que se actualiza solo y cuesta US$0 de hosting.
 
@@ -39,15 +39,15 @@ Hecho por Dalmiro Cordeyro.
 
 ### 2. Subir el código a GitHub
 
-1. En GitHub: **New repository** → nombre `golong` → **Public** (recomendado: los minutos de GitHub Actions son ilimitados en repos públicos, y además suma a tu perfil) → **Create**.
+1. En GitHub: **New repository** → nombre `dolarahora` → **Public** (recomendado: los minutos de GitHub Actions son ilimitados en repos públicos, y además suma a tu perfil) → **Create**.
 2. En tu compu, dentro de la carpeta del proyecto:
 
 ```bash
 git init
 git add .
-git commit -m "Primera versión de golong"
+git commit -m "Primera versión de DolarAhora"
 git branch -M main
-git remote add origin https://github.com/TU-USUARIO/golong.git
+git remote add origin https://github.com/TU-USUARIO/dolarahora.git
 git push -u origin main
 ```
 
@@ -63,22 +63,22 @@ git push -u origin main
      - `CLOUDFLARE_ACCOUNT_ID` = tu Account ID
      - `COINGECKO_API_KEY` = *(opcional)* una "Demo API key" gratuita de https://www.coingecko.com/en/api, para evitar límites de consultas
    - Pestaña **Variables** → *New repository variable* (solo mientras no tengas dominio propio):
-     - `SITE_URL` = `https://golong.TU-SUBDOMINIO.workers.dev` (lo vas a ver después del primer deploy)
+     - `SITE_URL` = `https://dolarahora.TU-SUBDOMINIO.workers.dev` (lo vas a ver después del primer deploy)
 4. En GitHub: pestaña **Actions** → *Actualizar y publicar* → **Run workflow**.
 
-En 2 o 3 minutos el sitio queda online en `https://golong.<tu-subdominio>.workers.dev`. Desde ahí se actualiza solo.
+En 2 o 3 minutos el sitio queda online en `https://dolarahora.<tu-subdominio>.workers.dev`. Desde ahí se actualiza solo.
 
 > Mientras el sitio esté en `*.workers.dev`, se publica con `noindex` y `robots.txt` bloqueando buscadores: así Google no indexa la dirección temporal y después no hay contenido duplicado al pasar al dominio propio. Se desactiva solo cuando borrás la variable `SITE_URL`.
 
 ### 4. Dominio propio
 
-`golong.com` y `golong.app` ya están registrados. **`golong.com.ar` y `golong.ar` parecían libres** al 20/09/2026 (verificalo en https://nic.ar).
+`DolarAhora.com` y `DolarAhora.app` ya están registrados. **`dolarahora.com.ar` y `dolarahora.ar` parecían libres** al 20/09/2026 (verificalo en https://nic.ar).
 
 1. Registralo en **NIC Argentina** (https://nic.ar, necesitás clave fiscal nivel 2). El costo anual es bajo; revisá el arancel vigente.
-2. En Cloudflare: **Add a site** → `golong.com.ar` → plan **Free**. Cloudflare te da dos *nameservers*.
+2. En Cloudflare: **Add a site** → `dolarahora.com.ar` → plan **Free**. Cloudflare te da dos *nameservers*.
 3. En NIC Argentina: *Mis dominios → Delegar* → cargá esos dos nameservers.
-4. Cuando Cloudflare marque el dominio como activo: *Workers & Pages → golong → Settings → Domains & Routes → Add → Custom domain* → `golong.com.ar` (y también `www.golong.com.ar` si querés).
-5. En `src/site.config.ts` confirmá que `domain: 'golong.com.ar'`, y en GitHub borrá la variable `SITE_URL`.
+4. Cuando Cloudflare marque el dominio como activo: *Workers & Pages → dolarahora → Settings → Domains & Routes → Add → Custom domain* → `dolarahora.com.ar` (y también `www.dolarahora.com.ar` si querés).
+5. En `src/site.config.ts` confirmá que `domain: 'dolarahora.com.ar'`, y en GitHub borrá la variable `SITE_URL`.
 
 ---
 
@@ -98,8 +98,8 @@ En 2 o 3 minutos el sitio queda online en `https://golong.<tu-subdominio>.worker
 ## Que te encuentren a vos en Google
 
 - Completá `author.sameAs` en `src/site.config.ts` con tus perfiles (LinkedIn, GitHub, X). Eso alimenta los datos estructurados `Person` de `/sobre-mi` y es lo que le indica a Google que ese sitio es tuyo.
-- Poné el link a golong en tus perfiles (el vínculo tiene que ir en los dos sentidos).
-- Dá de alta el sitio en **Google Search Console** (https://search.google.com/search-console), verificá el dominio desde Cloudflare y enviá el sitemap: `https://golong.com.ar/sitemap-index.xml`.
+- Poné el link al sitio en tus perfiles (el vínculo tiene que ir en los dos sentidos).
+- Dá de alta el sitio en **Google Search Console** (https://search.google.com/search-console), verificá el dominio desde Cloudflare y enviá el sitemap: `https://dolarahora.com.ar/sitemap-index.xml`.
 
 ---
 

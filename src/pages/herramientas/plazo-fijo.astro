@@ -137,7 +137,7 @@ const faq = [
     calc();
   });
   [monto, dias, tna].forEach((i) => i.addEventListener('input', calc));
-  document.addEventListener('golong:dollars', (e) => {
+  document.addEventListener('dolarahora:dollars', (e) => {
     const m = (e as CustomEvent).detail.mep;
     if (m) {
       cfg.mep = m.venta;

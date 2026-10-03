@@ -160,7 +160,7 @@ const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : nu
     };
     usd.addEventListener('input', calc);
     ars.addEventListener('input', calc);
-    document.addEventListener('golong:dollars', (e) => {
+    document.addEventListener('dolarahora:dollars', (e) => {
       const d = (e as CustomEvent).detail[box.dataset.slug!];
       if (d) {
         venta = d.venta;

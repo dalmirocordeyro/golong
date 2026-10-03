@@ -54,30 +54,30 @@ async function build(): Promise<SiteData> {
   function pick<T>(s: Settled<T>, fallback: (p: SiteData) => T, label: string): T {
     if (s.ok) return s.value;
     if (prev) {
-      console.warn(`[golong] ${label}: fuente caída (${s.error}); uso datos del snapshot anterior.`);
+      console.warn(`[DolarAhora] ${label}: fuente caída (${s.error}); uso datos del snapshot anterior.`);
       return fallback(prev);
     }
-    throw new Error(`[golong] ${label}: fuente caída y no hay snapshot anterior. ${s.error}`);
+    throw new Error(`[DolarAhora] ${label}: fuente caída y no hay snapshot anterior. ${s.error}`);
   }
   /** Datos opcionales: si no hay nada, la sección se muestra vacía en lugar de frenar el sitio entero. */
   function pickOr<T>(s: Settled<T>, fallback: (p: SiteData) => T, empty: T, label: string): T {
     if (s.ok || prev) return pick(s, fallback, label);
-    console.warn(`[golong] ${label}: fuente caída y sin snapshot anterior; la sección queda vacía.`);
+    console.warn(`[DolarAhora] ${label}: fuente caída y sin snapshot anterior; la sección queda vacía.`);
     return empty;
   }
 
   // Dólares: cotización (DolarApi) + historial (ArgentinaDatos), cada uno con su respaldo.
   let histories: Record<string, Point[]> | null = hist.ok ? hist.value : null;
   if (!histories && prev) {
-    console.warn(`[golong] historial de dólares: uso snapshot anterior.`);
+    console.warn(`[DolarAhora] historial de dólares: uso snapshot anterior.`);
     histories = Object.fromEntries(Object.values(prev.dollars).map((d) => [d.casa, d.history]));
   }
   let q = quotes.ok ? quotes.value : null;
   if (!q && prev) {
-    console.warn(`[golong] cotizaciones: uso snapshot anterior.`);
+    console.warn(`[DolarAhora] cotizaciones: uso snapshot anterior.`);
     q = Object.values(prev.dollars).map((d) => ({ casa: d.casa, nombre: d.nombre, compra: d.compra, venta: d.venta, fechaActualizacion: d.fecha }));
   }
-  if (!q && !histories) throw new Error('[golong] No hay datos de dólar (DolarApi y ArgentinaDatos caídos, sin snapshot previo).');
+  if (!q && !histories) throw new Error('[DolarAhora] No hay datos de dólar (DolarApi y ArgentinaDatos caídos, sin snapshot previo).');
   const dollars = buildDollars(q ?? [], histories ?? {});
 
   const m = pickOr(
@@ -100,7 +100,7 @@ async function build(): Promise<SiteData> {
   };
 
   const bad = Object.entries(sources).filter(([, s]) => !s.ok);
-  console.log(`[golong] datos listos ${data.generatedAt}. Fuentes con problemas: ${bad.length ? bad.map(([k]) => k).join(', ') : 'ninguna'}`);
+  console.log(`[DolarAhora] datos listos ${data.generatedAt}. Fuentes con problemas: ${bad.length ? bad.map(([k]) => k).join(', ') : 'ninguna'}`);
   return data;
 }
 

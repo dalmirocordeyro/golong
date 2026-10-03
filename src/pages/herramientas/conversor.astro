@@ -99,7 +99,7 @@ const faq = [
     }),
   );
   input.addEventListener('input', calc);
-  document.addEventListener('golong:dollars', (e) => {
+  document.addEventListener('dolarahora:dollars', (e) => {
     const live = (e as CustomEvent).detail as Record<string, { venta: number; compra: number | null }>;
     for (const r of data.rates) {
       const l = live[r.slug];

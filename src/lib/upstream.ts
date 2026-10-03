@@ -2,7 +2,7 @@
 // MOCK_UPSTREAM=http://localhost:4599 redirige todo al servidor de pruebas (dev/mock-server.mjs).
 
 const MOCK = process.env.MOCK_UPSTREAM?.replace(/\/$/, '');
-const UA = 'golong-build/1.0 (+https://github.com)';
+const UA = 'dolarahora-build/1.0 (+https://github.com)';
 
 function resolve(url: string): string {
   if (!MOCK) return url;

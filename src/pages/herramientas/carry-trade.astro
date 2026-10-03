@@ -307,7 +307,7 @@ const faq = [
     for (const b of root.querySelectorAll<HTMLButtonElement>('[data-esc]')) {
       b.addEventListener('click', () => aplicarEscenario(b.dataset.esc!));
     }
-    document.addEventListener('golong:dollars', (ev) => {
+    document.addEventListener('dolarahora:dollars', (ev) => {
       const m = (ev as CustomEvent).detail?.mep;
       if (m?.venta) {
         const previo = parse(mepIn.value);

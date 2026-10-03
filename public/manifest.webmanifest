@@ -1,6 +1,6 @@
 {
-  "name": "golong · Dólar hoy y mercados",
-  "short_name": "golong",
+  "name": "DolarAhora · Dólar hoy y mercados",
+  "short_name": "DolarAhora",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4f4f1",

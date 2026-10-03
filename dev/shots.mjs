@@ -12,7 +12,7 @@ let playwright;
 try { playwright = require('playwright'); } catch { playwright = require(join(execSync('npm root -g').toString().trim(), 'playwright')); }
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
-const OUT = process.env.SHOTS_DIR || '/tmp/golong-shots';
+const OUT = process.env.SHOTS_DIR || '/tmp/dolarahora-shots';
 mkdirSync(OUT, { recursive: true });
 const args = process.argv.slice(2);
 const paths = args.filter((a) => a.startsWith('/'));
