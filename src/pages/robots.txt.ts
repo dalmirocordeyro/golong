@@ -1,8 +1,8 @@
 import { SITE } from '../site.config';
 
 export function GET() {
-  // En la dirección temporal (*.workers.dev) se bloquea la indexación hasta tener el dominio propio.
-  const preview = SITE.url.includes('.workers.dev');
+  // En la dirección temporal (*.workers.dev) se bloquea la indexación, salvo que SITE.indexPreview esté activado.
+  const preview = SITE.url.includes('.workers.dev') && !SITE.indexPreview;
   const body = preview
     ? `User-agent: *\nDisallow: /\n`
     : `User-agent: *\nAllow: /\nDisallow: /data/\n\nSitemap: ${SITE.url}/sitemap-index.xml\n`;
