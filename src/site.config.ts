@@ -17,11 +17,22 @@ export const SITE = {
     'Cotización del dólar blue, oficial, MEP, CCL, cripto y tarjeta en vivo, brecha cambiaria, riesgo país, inflación, acciones del Merval, bonos, CEDEARs y criptomonedas.',
   locale: 'es-AR',
 
+  /**
+   * Permite que Google indexe el sitio aunque esté en la dirección temporal (*.workers.dev).
+   * Al pasar al dominio propio, redirigí la dirección vieja a la nueva y avisale a Google
+   * con "Cambio de dirección" en Search Console.
+   */
+  indexPreview: true,
+
+  /** Código de verificación de Google Search Console (etiqueta HTML). */
+  googleSiteVerification: 'Azew9GE6b0GpXx7Bb6DOayyYHIHjrAxzCA8mXYLIjJ0',
+
   author: {
     name: 'Dalmiro Cordeyro',
     /** Perfiles públicos: ayudan a que Google asocie el sitio con vos. */
     sameAs: [
       'https://github.com/dalmirocordeyro',
+      'https://www.linkedin.com/in/dalmiro-cordeyro-218b80123/',
       // Agregá acá tu LinkedIn u otros perfiles públicos. Poné también
       // el link a este sitio en cada perfil: el vínculo tiene que ir en los dos sentidos.
     ] as string[],
