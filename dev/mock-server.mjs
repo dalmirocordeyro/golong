@@ -96,6 +96,30 @@ function tickerHistory(kind, ticker) {
   return out;
 }
 
+// Compras de divisas del BCRA (variable 78), días hábiles. Forma aproximada a la real:
+// compras a comienzos de 2025, ventas en mar-abr y sep 2025, sin intervención el resto
+// de 2025 y compras sostenidas en 2026. Termina 3 días hábiles antes de TAIL_END.
+function bcraCompras() {
+  const r = rng('bcra');
+  const detalle = [];
+  let habiles = 0;
+  for (let f = TAIL_END; f >= '2023-09-01'; f = addDays(f, -1)) {
+    const dow = new Date(f + 'T12:00:00Z').getUTCDay();
+    if (dow === 0 || dow === 6) continue;
+    if (++habiles <= 3) continue;
+    const ym = f.slice(0, 7);
+    let v;
+    if (ym < '2025-01') v = (r() - 0.35) * 160;
+    else if (ym < '2025-03') v = 20 + r() * 140;
+    else if (ym < '2025-05') v = -(10 + r() * 180);
+    else if (ym === '2025-09') v = -(r() * 260);
+    else if (ym < '2026-01') v = 0;
+    else v = 20 + r() * 150 - (r() < 0.12 ? 120 : 0);
+    detalle.push({ fecha: f, valor: Math.round(v * 10) / 10 });
+  }
+  return { status: 200, metadata: { resultset: { count: detalle.length, offset: 0, limit: 3000 } }, results: [{ idVariable: 78, detalle }] };
+}
+
 const routes = [
   [/^\/dolarapi\.com\/v1\/dolares$/, () => fx.dol],
   [/^\/dolarapi\.com\/v1\/cotizaciones$/, () => fx.cot],
@@ -112,6 +136,7 @@ const routes = [
   [/^\/data912\.com\/live\/usa_adrs$/, () => expand(fx.adrs.filter((a) => !['MELI', 'GLOB', 'VIST', 'DESP', 'BIOX', 'CAAP'].includes(a[0])))],
   [/^\/data912\.com\/live\/usa_stocks$/, () => expand(fx.adrs.filter((a) => ['MELI', 'GLOB', 'VIST', 'DESP', 'BIOX', 'CAAP'].includes(a[0])))],
   [/^\/data912\.com\/historical\/(stocks|bonds|cedears)\/([A-Z0-9.]+)$/, (m) => tickerHistory(m[1], m[2])],
+  [/^\/api\.bcra\.gob\.ar\/estadisticas\/v4\.0\/monetarias\/78$/, () => bcraCompras()],
   [/^\/api\.coingecko\.com\/api\/v3\/coins\/markets$/, () => fx.cg],
 ];
 
