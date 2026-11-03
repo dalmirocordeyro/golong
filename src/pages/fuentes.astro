@@ -8,10 +8,11 @@ const rows = [
   { key: 'dolarapi', name: 'DolarApi.com', url: 'https://dolarapi.com', what: 'Cotizaciones del dólar (oficial, blue, MEP, CCL, cripto, tarjeta, mayorista) y otras monedas.', freq: 'Cada minuto en tu navegador; en cada actualización del sitio.' },
   { key: 'argentinadatos', name: 'ArgentinaDatos', url: 'https://argentinadatos.com', what: 'Historial del dólar, riesgo país (JP Morgan), inflación (INDEC) y tasas de plazo fijo (BCRA).', freq: 'En cada actualización del sitio.' },
   { key: 'data912', name: 'data912', url: 'https://data912.com', what: 'Acciones, bonos, CEDEARs y ADRs. Precios con demora.', freq: 'En cada actualización del sitio.' },
+  { key: 'bcra', name: 'Banco Central (BCRA)', url: 'https://www.bcra.gob.ar/apis-banco-central/', what: 'Compras y ventas de divisas del Banco Central en el mercado de cambios.', freq: 'En cada actualización del sitio. El BCRA publica con 2 o 3 días hábiles de demora.' },
   { key: 'coingecko', name: 'CoinGecko', url: 'https://www.coingecko.com', what: 'Precios y capitalización de criptomonedas.', freq: 'Cada dos minutos en tu navegador; en cada actualización del sitio.' },
 ] as const;
 ---
-<Base title="Fuentes de datos" description="De dónde salen los datos que muestra el sitio: DolarApi, ArgentinaDatos, data912 y CoinGecko. Frecuencia de actualización y estado de cada fuente." crumbs={[{ label: 'Fuentes de datos', href: '/fuentes' }]}>
+<Base title="Fuentes de datos" description="De dónde salen los datos que muestra el sitio: DolarApi, ArgentinaDatos, data912, el Banco Central y CoinGecko. Frecuencia de actualización y estado de cada fuente." crumbs={[{ label: 'Fuentes de datos', href: '/fuentes' }]}>
   <section class="page-head">
     <h1>Fuentes de datos</h1>
     <p class="lead">Todo lo que ves acá proviene de fuentes públicas y gratuitas. Gracias a quienes las mantienen.</p>
