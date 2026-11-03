@@ -25,7 +25,7 @@ export const SITE = {
   indexPreview: true,
 
   /** Código de verificación de Google Search Console (etiqueta HTML). */
-  googleSiteVerification: 'Azew9GE6b0GpXx7Bb6DOayyYHIHjrAxzCA8mXYLIjJ0',
+  googleSiteVerification: '-cp3S-H9Imjih2WYReb1-wJXdObhudEK-8j1Sd1z13o',
 
   author: {
     name: 'Dalmiro Cordeyro',
