@@ -2,6 +2,7 @@
 import { SITE } from '../site.config';
 import Logo from './Logo.astro';
 import Updated from './Updated.astro';
+import SobreProyecto from './SobreProyecto.astro';
 interface Props { generatedAt: string }
 const { generatedAt } = Astro.props;
 const year = new Date(generatedAt).getFullYear();
@@ -64,7 +65,7 @@ const TAGS: [string, string][] = [
     </div>
     <section class="footer-about" aria-labelledby="sobre-sitio">
       <h3 id="sobre-sitio">Sobre {SITE.name}</h3>
-      <p>Proyecto personal sin fines de lucro, hecho para investigar tecnologías de la información.</p>
+      <SobreProyecto />
       <p>Contacto: <a href="mailto:dalmiro@gmail.com">dalmiro@gmail.com</a></p>
     </section>
     <p class="disclaimer">
