@@ -103,7 +103,17 @@ export interface PlazoFijo {
   enlace: string | null;
 }
 
-export type SourceKey = 'dolarapi' | 'argentinadatos' | 'data912' | 'coingecko';
+/** Compras netas de divisas del BCRA en el mercado de cambios, en millones de USD. */
+export interface ComprasBcra {
+  /** Fecha del último dato publicado (AAAA-MM-DD). El BCRA publica con 2 o 3 días hábiles de demora. */
+  fecha: string;
+  /** Monto de cada día hábil (último año y medio). */
+  diario: Point[];
+  /** Suma de cada mes (clave AAAA-MM-01). */
+  mensual: Point[];
+}
+
+export type SourceKey = 'dolarapi' | 'argentinadatos' | 'data912' | 'coingecko' | 'bcra';
 
 export interface SourceStatus {
   ok: boolean;
@@ -127,5 +137,7 @@ export interface SiteData {
   crypto: Crypto[];
   fx: FxRate[];
   plazoFijo: PlazoFijo[];
+  /** Puede faltar en snapshots viejos o si la API del BCRA no respondió nunca. */
+  bcra?: ComprasBcra | null;
   sources: Record<SourceKey, SourceStatus>;
 }
