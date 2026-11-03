@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import SobreProyecto from '../components/SobreProyecto.astro';
 import { SITE } from '../site.config';
 const a = SITE.author;
 const nombrePerfil = (u: string) =>
@@ -28,7 +27,15 @@ const person = {
     )}
   </section>
   <section class="prose sobre">
-    <SobreProyecto />
+    <p>
+      Proyecto personal, sin fines de lucro y sin publicidad, hecho por {a.name}. No está asociado a ninguna empresa,
+      organización o persona jurídica de ningún tipo, y su autor no obtiene ingresos ni beneficios de ninguna clase.
+    </p>
+    <p>Este sitio está realizado con fines exclusivamente educativos y de experimentación con tecnologías de la información.</p>
+    <p>
+      Las fuentes de los datos aquí expuestos son públicas y pueden contener errores o atrasos, por lo que no deben
+      considerarse fiables para tomar decisiones patrimoniales.
+    </p>
   </section>
   <figure class="cita">
     <blockquote>
