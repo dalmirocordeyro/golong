@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import SobreProyecto from '../components/SobreProyecto.astro';
 import { SITE } from '../site.config';
 const a = SITE.author;
 const nombrePerfil = (u: string) =>
@@ -15,10 +16,9 @@ const person = {
   ...(a.sameAs.length ? { sameAs: a.sameAs } : {}),
 };
 ---
-<Base title={a.name} description={a.name} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[{ '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person }]}>
+<Base title={a.name} description={`${a.name}: autor de ${SITE.name}, un proyecto personal sin fines de lucro sobre el dólar y los mercados de Argentina.`} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[{ '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person }]}>
   <section class="page-head">
     <h1>{a.name}</h1>
-    <p class="lead">2026 · Página en construcción</p>
     {a.sameAs.length > 0 && (
       <p class="perfiles">
         {a.sameAs.map((u, i) => (
@@ -27,4 +27,21 @@ const person = {
       </p>
     )}
   </section>
+  <section class="prose sobre">
+    <SobreProyecto />
+  </section>
+  <figure class="cita">
+    <blockquote>
+      <p>«Abre la mente a lo que te manifiesto y fíjalo bien dentro; que no hace ciencia, si no se retiene lo que se ha comprendido».</p>
+    </blockquote>
+    <figcaption>— Beatriz, en Dante Alighieri, <cite>Divina Comedia</cite>, Paraíso, Canto V</figcaption>
+  </figure>
 </Base>
+
+<style>
+  .sobre :global(p) { margin: 0 0 12px; }
+  .cita { margin: 40px 0 8px; padding-top: 22px; border-top: 1px solid var(--border); max-width: 72ch; }
+  .cita blockquote { margin: 0; font-style: italic; color: var(--text-2); font-size: 1.05rem; line-height: 1.6; }
+  .cita blockquote p { margin: 0; }
+  .cita figcaption { margin-top: 10px; font-size: 0.85rem; color: var(--muted); }
+</style>
