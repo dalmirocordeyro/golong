@@ -3,6 +3,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dolarahora",
   "compatibility_date": "2026-09-01",
+  // El sitio se publica solo en el dominio propio (conectado desde el panel de Cloudflare).
+  // Apaga la dirección *.workers.dev y las URLs de vista previa para que no haya copias del sitio.
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page",
