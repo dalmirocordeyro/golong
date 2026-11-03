@@ -232,6 +232,103 @@ export function renderBarChart(o: BarChartOpts): string {
   return p.join('');
 }
 
+// ── Dos paneles con meses compartidos (riesgo país + compras del BCRA) ──
+
+export interface DualChartOpts {
+  /** claves AAAA-MM-01 */
+  months: string[];
+  /** panel de arriba: línea */
+  top: (number | null)[];
+  /** panel de abajo: columnas positivas/negativas */
+  bottom: (number | null)[];
+  topLabel: string;
+  bottomLabel: string;
+  /** la última columna es de un mes incompleto */
+  partial?: boolean;
+  width: number;
+  height: number;
+}
+
+export function dualLayout(o: DualChartOpts) {
+  const n = Math.max(1, o.months.length);
+  const tv = o.top.filter((v): v is number => v != null);
+  const bv = o.bottom.filter((v): v is number => v != null);
+  const T = yDomain(tv.length ? tv : [0, 1], false, 3);
+  const B = yDomain(bv.length ? bv : [0, 1], true, 3);
+  const w = (v: number, f: ValueFormat, st: number) => fmtTick(v, f, st).length;
+  const tickW = Math.max(w(T.lo, 'pts', T.step), w(T.hi, 'pts', T.step), w(B.lo, 'num', B.step), w(B.hi, 'num', B.step)) * 6.4 + 10;
+  const left = Math.ceil(tickW);
+  const right = o.width - 8;
+  const band = (right - left) / n;
+  const cx = (i: number) => left + band * i + band / 2;
+  const top1 = 26;
+  const bottom1 = Math.round(o.height * 0.5);
+  const top2 = bottom1 + 40;
+  const bottom2 = o.height - 24;
+  const y1 = (v: number) => bottom1 - ((v - T.lo) / (T.hi - T.lo || 1)) * (bottom1 - top1);
+  const y2 = (v: number) => bottom2 - ((v - B.lo) / (B.hi - B.lo || 1)) * (bottom2 - top2);
+  const bw = Math.max(2, Math.min(22, band - 3));
+  return { n, T, B, left, right, band, cx, top1, bottom1, top2, bottom2, y1, y2, bw };
+}
+
+export function renderDualChart(o: DualChartOpts): string {
+  const L = dualLayout(o);
+  const p: string[] = [];
+  p.push(`<svg class="chart-svg" viewBox="0 0 ${o.width} ${o.height}" width="${o.width}" height="${o.height}" role="img" aria-hidden="true" focusable="false">`);
+  // panel de arriba
+  p.push(`<text class="panel-label" x="${L.left}" y="${L.top1 - 12}">${esc(o.topLabel)}</text>`);
+  for (let v = L.T.lo; v <= L.T.hi + L.T.step / 1000; v += L.T.step) {
+    const yy = r1(L.y1(v));
+    p.push(`<line class="grid" x1="${L.left}" x2="${L.right}" y1="${yy}" y2="${yy}"/>`);
+    p.push(`<text class="tick" x="${L.left - 8}" y="${yy + 3.5}" text-anchor="end">${esc(fmtTick(v, 'pts', L.T.step))}</text>`);
+  }
+  let d = '';
+  let pen = false;
+  let last: { x: number; y: number; v: number } | null = null;
+  o.top.forEach((v, i) => {
+    if (v == null) { pen = false; return; }
+    const x = r1(L.cx(i));
+    const y = r1(L.y1(v));
+    d += `${pen ? 'L' : 'M'}${x} ${y}`;
+    pen = true;
+    last = { x, y, v };
+  });
+  if (d) p.push(`<path class="line s1" d="${d}"/>`);
+  if (last) {
+    const e = last as { x: number; y: number; v: number };
+    p.push(`<circle class="end s1" cx="${e.x}" cy="${e.y}" r="4"/>`);
+    const ly = e.y - 10 < L.top1 + 6 ? e.y + 18 : e.y - 10;
+    p.push(`<text class="end-label" x="${r1(e.x - 6)}" y="${r1(ly)}" text-anchor="end">${esc(fmtValue(e.v, 'pts'))}</text>`);
+  }
+  // panel de abajo
+  p.push(`<text class="panel-label" x="${L.left}" y="${L.top2 - 14}">${esc(o.bottomLabel)}</text>`);
+  for (let v = L.B.lo; v <= L.B.hi + L.B.step / 1000; v += L.B.step) {
+    const yy = r1(L.y2(v));
+    p.push(`<line class="${Math.abs(v) < 1e-9 ? 'baseline' : 'grid'}" x1="${L.left}" x2="${L.right}" y1="${yy}" y2="${yy}"/>`);
+    p.push(`<text class="tick" x="${L.left - 8}" y="${yy + 3.5}" text-anchor="end">${esc(fmtTick(v, 'num', L.B.step))}</text>`);
+  }
+  const y0 = L.y2(0);
+  o.bottom.forEach((v, i) => {
+    if (v == null || v === 0) return;
+    const x = L.cx(i) - L.bw / 2;
+    const yv = L.y2(v);
+    const h = Math.abs(y0 - yv);
+    const r = Math.min(3, h, L.bw / 2);
+    const s = v > 0 ? 1 : -1;
+    const path = `M${r1(x)} ${r1(y0)}V${r1(yv + s * r)}Q${r1(x)} ${r1(yv)} ${r1(x + r)} ${r1(yv)}H${r1(x + L.bw - r)}Q${r1(x + L.bw)} ${r1(yv)} ${r1(x + L.bw)} ${r1(yv + s * r)}V${r1(y0)}Z`;
+    const cls = `bar ${v > 0 ? 'pos' : 'neg'}${o.partial && i === o.months.length - 1 ? ' partial' : ''}`;
+    p.push(`<path class="${cls}" data-i="${i}" d="${path}"/>`);
+  });
+  // eje X compartido
+  const every = Math.max(1, Math.ceil(L.n / Math.max(2, Math.floor(o.width / 64))));
+  o.months.forEach((k, i) => {
+    if ((L.n - 1 - i) % every !== 0) return;
+    p.push(`<text class="tick" x="${r1(L.cx(i))}" y="${L.bottom2 + 16}" text-anchor="middle">${esc(monthShortYear(k))}</text>`);
+  });
+  p.push('</svg>');
+  return p.join('');
+}
+
 // ── Sparkline ───────────────────────────────────────────────
 
 export function renderSparkline(points: Point[], width = 120, height = 36, slot = 1): string {
