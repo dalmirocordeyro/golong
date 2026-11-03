@@ -163,11 +163,10 @@ main { padding-bottom: 48px; }
   :root:not([data-theme='light']) .theme-toggle .moon { display: none; }
 }
 .nav-mobile { display: none; }
-@media (max-width: 899px) {
+@media (max-width: 1099px) {
   .nav { display: none; }
   .nav-mobile {
     display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 0 16px 10px; margin: 0 -16px;
-    mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 24px), transparent);
   }
   .nav-mobile::-webkit-scrollbar { display: none; }
   .nav-mobile a {
@@ -185,6 +184,36 @@ main { padding-bottom: 48px; }
 .strip a { color: var(--text-2); white-space: nowrap; display: inline-flex; gap: 6px; align-items: baseline; }
 .strip a:hover { text-decoration: none; color: var(--text); }
 .strip b { color: var(--text); font-weight: 620; font-variant-numeric: tabular-nums; }
+
+/* Franjas deslizables (scripts/hscroll.ts): degradé en el borde con más contenido y,
+   con mouse, flechas y arrastre. */
+.hs { position: relative; }
+.hs > .strip-row, .hs > .nav-mobile {
+  --fl: 0px; --fr: 0px;
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent);
+}
+.hs.can-l > .strip-row, .hs.can-l > .nav-mobile { --fl: 40px; }
+.hs.can-r > .strip-row, .hs.can-r > .nav-mobile { --fr: 56px; }
+.hs > .tbl-wrap { --fr: 0px; mask-image: linear-gradient(90deg, #000 calc(100% - var(--fr)), transparent); }
+.hs.can-r > .tbl-wrap { --fr: 36px; }
+.hs .dragging { cursor: grabbing; user-select: none; }
+.hs .dragging a { pointer-events: none; }
+.hs-btn {
+  display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 28px; height: 28px; padding: 0; border-radius: 50%; cursor: pointer;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+}
+.hs-btn:hover { background: var(--surface-2); }
+.hs-btn.prev { left: 6px; }
+.hs-btn.next { right: 6px; }
+.hs.wrap > .hs-btn.prev { left: 10px; }
+.hs.wrap > .hs-btn.next { right: 10px; }
+.site-header .hs-btn { top: calc(50% - 5px); }
+@media (hover: hover) and (pointer: fine) {
+  .hs-ctrl.can-l > .hs-btn.prev, .hs-ctrl.can-r > .hs-btn.next { display: inline-flex; }
+}
 
 /* ───────────── Estado del mercado ───────────── */
 .status-line { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--muted); font-size: 0.84rem; margin-top: 6px; }
@@ -360,7 +389,15 @@ main { padding-bottom: 48px; }
 .tbl th[aria-sort] button::after { content: ' ↕'; opacity: 0.4; }
 .tbl th[aria-sort='ascending'] button::after { content: ' ↑'; opacity: 1; }
 .tbl th[aria-sort='descending'] button::after { content: ' ↓'; opacity: 1; }
-@media (max-width: 640px) { .tbl .opt { display: none; } }
+@media (max-width: 640px) {
+  .tbl .opt { display: none; }
+  .tbl { font-size: 0.84rem; }
+  .tbl thead th { padding: 8px 6px; }
+  .tbl td, .tbl tbody th { padding: 9px 6px; }
+}
+/* La primera columna (nombre y descripción) puede bajar de renglón para dejar lugar a los números. */
+.tbl tbody th:first-child { white-space: normal; }
+@media (max-width: 899px) { .tbl tbody th:first-child { min-width: 7.5rem; } }
 .tbl-foot { font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
 
 .g-markets { grid-template-columns: 1fr; }
