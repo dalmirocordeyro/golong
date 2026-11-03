@@ -1,12 +1,33 @@
 ---
-// Leyenda del proyecto. Se usa en el pie de todas las páginas y en /sobre-mi.
+// Leyenda del proyecto. Es la misma en el pie de todas las páginas y en /sobre-mi.
 import { SITE } from '../site.config';
 ---
-<p>
-  Proyecto personal, sin fines de lucro y sin publicidad, hecho por {SITE.author.name}. No está asociado a ninguna
-  empresa, organización ni persona jurídica, y su autor no obtiene ingresos ni beneficios de ningún tipo por él.
-</p>
-<p>
-  Lo hice para aprender y experimentar con tecnologías de la información; en particular, el uso de APIs públicas,
-  la generación de sitios estáticos y la publicación automática con GitHub Actions y Cloudflare.
-</p>
+<div class="sobre-proyecto">
+  <p>
+    Proyecto personal, sin fines de lucro y sin publicidad, hecho por {SITE.author.name}. No está asociado a ninguna
+    empresa, organización o persona jurídica de ningún tipo, y su autor no obtiene ingresos ni beneficios de ninguna clase.
+  </p>
+  <p>
+    Este sitio está realizado con fines exclusivamente educativos y de experimentación con tecnologías de la información
+    y la cultura DevOps; en particular, el uso de APIs públicas, la generación de sitios estáticos y la publicación
+    automática con GitHub Actions y Cloudflare.
+  </p>
+  <p>
+    Las fuentes de los datos aquí expuestos son públicas y pueden contener errores o atrasos, por lo que no deben
+    considerarse fiables para tomar decisiones patrimoniales.
+  </p>
+  <p>Contacto: <a href="mailto:dalmiro@gmail.com">dalmiro@gmail.com</a></p>
+  <figure class="cita">
+    <blockquote>
+      <p>«Abre la mente a lo que te manifiesto y fíjalo bien dentro; que no hace ciencia, si no se retiene lo que se ha comprendido».</p>
+    </blockquote>
+    <figcaption>— Beatriz</figcaption>
+  </figure>
+</div>
+
+<style>
+  .cita { margin: 18px 0 0; max-width: 72ch; }
+  .cita blockquote { margin: 0; font-style: italic; }
+  .cita blockquote p { margin: 0; }
+  .cita figcaption { margin-top: 6px; font-size: 0.85em; color: var(--muted); }
+</style>
