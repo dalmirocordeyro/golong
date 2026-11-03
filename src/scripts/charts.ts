@@ -1,12 +1,14 @@
 // Interactividad de los gráficos: rangos, tamaño real, crosshair + tooltip y teclado.
-import { barLayout, fmtValue, lineLayout, renderBarChart, renderLineChart, type Series, type ValueFormat } from '../lib/chart';
+import { barLayout, dualLayout, fmtValue, lineLayout, renderBarChart, renderDualChart, renderLineChart, type Series, type ValueFormat } from '../lib/chart';
+import { musd } from '../lib/bcra';
 import { dmy, monthShortYear, monthYear, num, pct } from '../lib/format';
 import { RANGES, rangeStats, sliceRange, toTime } from '../lib/series';
 import type { Point } from '../lib/types';
 
 interface LineCfg { type: 'line'; series: Series[]; format: ValueFormat; area?: boolean; refLine?: number | null; height: number; range: string; statsFormat?: ValueFormat }
 interface BarCfg { type: 'bar'; points: Point[]; format: ValueFormat; height: number; slot?: number; label: 'month' }
-type Cfg = LineCfg | BarCfg;
+interface DualCfg { type: 'dual'; months: string[]; top: (number | null)[]; bottom: (number | null)[]; topLabel: string; bottomLabel: string; partial?: boolean; height: number }
+type Cfg = LineCfg | BarCfg | DualCfg;
 
 const heightFor = (h: number, w: number) => (w < 520 ? Math.round(h * 0.8) : h);
 
@@ -216,12 +218,98 @@ function setupBar(plot: HTMLElement, cfg: BarCfg) {
   render();
 }
 
+function setupDual(plot: HTMLElement, cfg: DualCfg) {
+  let width = 0;
+  let layout: ReturnType<typeof dualLayout> | null = null;
+  const tip = el('div', 'tooltip');
+  const xhair = el('div', 'xhair');
+  const dot = el('div', 'hdot s1');
+  let idx = -1;
+  const n = cfg.months.length;
+
+  const render = () => {
+    width = Math.max(280, Math.round(plot.clientWidth));
+    const opts = { ...cfg, width, height: cfg.height };
+    plot.innerHTML = renderDualChart(opts);
+    layout = dualLayout(opts);
+    plot.append(xhair, dot, tip);
+    hide();
+  };
+  const show = (i: number) => {
+    if (!layout) return;
+    idx = Math.max(0, Math.min(n - 1, i));
+    const x = layout.cx(idx);
+    const rp = cfg.top[idx];
+    const c = cfg.bottom[idx];
+    xhair.style.display = 'block';
+    xhair.style.left = `${x}px`;
+    xhair.style.top = `${layout.top1}px`;
+    xhair.style.height = `${layout.bottom2 - layout.top1}px`;
+    if (rp != null) {
+      dot.style.display = 'block';
+      dot.style.left = `${x}px`;
+      dot.style.top = `${layout.y1(rp)}px`;
+    } else dot.style.display = 'none';
+    plot.querySelectorAll('.bar').forEach((b) => b.classList.toggle('dim', Number((b as SVGElement).dataset.i) !== idx));
+    tip.replaceChildren();
+    const d = el('div', 'tt-date');
+    d.textContent = `${monthYear(cfg.months[idx], true)}${cfg.partial && idx === n - 1 ? ' (parcial)' : ''}`;
+    tip.append(d);
+    const fila = (cls: string, valor: string, etiqueta: string) => {
+      const row = el('div', `tt-row ${cls}`);
+      const key = document.createElement('i');
+      const b = document.createElement('b');
+      b.textContent = valor;
+      const lbl = document.createElement('span');
+      lbl.textContent = etiqueta;
+      row.append(key, b, lbl);
+      tip.append(row);
+    };
+    if (rp != null) fila('s1', fmtValue(rp, 'pts'), 'riesgo país');
+    if (c != null) fila(c > 0 ? 'pos' : c < 0 ? 'neg' : 'zero', musd(c), c > 0 ? 'compras' : c < 0 ? 'ventas' : 'sin operaciones');
+    tip.style.display = 'block';
+    const tw = tip.offsetWidth;
+    tip.style.left = `${Math.max(0, x + 14 + tw > width ? x - 14 - tw : x + 14)}px`;
+    tip.style.top = `${layout.top1}px`;
+  };
+  const hide = () => {
+    idx = -1;
+    tip.style.display = 'none';
+    xhair.style.display = 'none';
+    dot.style.display = 'none';
+    plot.querySelectorAll('.bar').forEach((b) => b.classList.remove('dim'));
+  };
+  plot.addEventListener('pointermove', (e) => {
+    if (!layout) return;
+    const r = plot.getBoundingClientRect();
+    const i = Math.floor((e.clientX - r.left - layout.left) / layout.band);
+    if (i < 0 || i >= n) return hide();
+    show(i);
+  });
+  plot.addEventListener('pointerleave', hide);
+  plot.addEventListener('blur', hide);
+  plot.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(idx < 0 ? n - 1 : idx - 1);
+    else if (e.key === 'ArrowRight') show(idx < 0 ? n - 1 : idx + 1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(n - 1);
+    else if (e.key === 'Escape') hide();
+    else return;
+    e.preventDefault();
+  });
+  new ResizeObserver(() => {
+    if (Math.abs(plot.clientWidth - width) > 4) render();
+  }).observe(plot);
+  render();
+}
+
 document.querySelectorAll<HTMLElement>('[data-chart]').forEach((root) => {
   const plot = root.querySelector<HTMLElement>('.chart');
   const cfgEl = root.querySelector('script[type="application/json"]');
   if (!plot || !cfgEl) return;
   const cfg: Cfg = JSON.parse(cfgEl.textContent || '{}');
   if (cfg.type === 'bar') setupBar(plot, cfg);
+  else if (cfg.type === 'dual') setupDual(plot, cfg);
   else setupLine(root, plot, cfg);
 });
 
