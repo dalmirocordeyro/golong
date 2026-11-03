@@ -6,7 +6,7 @@ import { LETRAS, LETRA_INFO } from '../content/letras';
 import { arDateKey } from './format';
 import { compactHistory, lastBefore } from './series';
 import { COINGECKO_URL, normalizeCrypto, type CgRow } from './sources-client';
-import type { Bond, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
+import type { Bond, ComprasBcra, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
 
 // ── DolarApi.com + ArgentinaDatos (historial) ───────────────
 
@@ -104,6 +104,35 @@ export async function fetchInflacion(): Promise<Inflacion> {
     ultimoInteranual: interanual[interanual.length - 1],
     acumuladoAnio,
     mesesAcumulados: thisYear.length,
+  };
+}
+
+// ── BCRA: compras de divisas en el mercado de cambios ───────
+// API de Estadísticas Monetarias v4, variable 78: "Variación de reservas internacionales
+// por compra de divisas" (millones de USD, un valor por día hábil).
+
+interface BcraSerie { results?: { detalle?: { fecha: string; valor: number }[] }[] }
+
+export async function fetchComprasBcra(): Promise<ComprasBcra> {
+  const hasta = arDateKey(new Date());
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 3);
+  const desde = d.toISOString().slice(0, 10);
+  const r = await fetchJSON<BcraSerie>(`https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/78?desde=${desde}&hasta=${hasta}&limit=3000`);
+  const diario: Point[] = (r.results?.[0]?.detalle ?? [])
+    .filter((x) => typeof x.valor === 'number' && /^\d{4}-\d{2}-\d{2}/.test(x.fecha))
+    .map((x) => [x.fecha.slice(0, 10), x.valor] as Point)
+    .sort((a, b) => a[0].localeCompare(b[0]));
+  if (!diario.length) throw new Error('BCRA: la serie de compras vino vacía');
+  const meses = new Map<string, number>();
+  for (const [f, v] of diario) {
+    const k = `${f.slice(0, 7)}-01`;
+    meses.set(k, (meses.get(k) ?? 0) + v);
+  }
+  return {
+    fecha: diario[diario.length - 1][0],
+    diario: diario.slice(-400),
+    mensual: [...meses].sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => [k, Math.round(v * 10) / 10] as Point),
   };
 }
 
