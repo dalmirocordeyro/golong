@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import SobreProyecto from '../components/SobreProyecto.astro';
 import { SITE } from '../site.config';
 const a = SITE.author;
 const nombrePerfil = (u: string) =>
@@ -27,32 +28,13 @@ const person = {
     )}
   </section>
   <section class="prose sobre">
-    <p>
-      Proyecto personal, sin fines de lucro y sin publicidad, hecho por {a.name}. No está asociado a ninguna empresa,
-      organización o persona jurídica de ningún tipo, y su autor no obtiene ingresos ni beneficios de ninguna clase.
-    </p>
-    <p>
-      Este sitio está realizado con fines exclusivamente educativos y de experimentación con tecnologías de la
-      información y la cultura DevOps; en particular, el uso de APIs públicas, la generación de sitios estáticos y la
-      publicación automática con GitHub Actions y Cloudflare.
-    </p>
-    <p>
-      Las fuentes de los datos aquí expuestos son públicas y pueden contener errores o atrasos, por lo que no deben
-      considerarse fiables para tomar decisiones patrimoniales.
-    </p>
+    <SobreProyecto />
   </section>
-  <figure class="cita">
-    <blockquote>
-      <p>«Abre la mente a lo que te manifiesto y fíjalo bien dentro; que no hace ciencia, si no se retiene lo que se ha comprendido».</p>
-    </blockquote>
-    <figcaption>— Beatriz</figcaption>
-  </figure>
 </Base>
 
 <style>
   .sobre :global(p) { margin: 0 0 12px; }
-  .cita { margin: 40px 0 8px; padding-top: 22px; border-top: 1px solid var(--border); max-width: 72ch; }
-  .cita blockquote { margin: 0; font-style: italic; color: var(--text-2); font-size: 1.05rem; line-height: 1.6; }
-  .cita blockquote p { margin: 0; }
-  .cita figcaption { margin-top: 10px; font-size: 0.85rem; color: var(--muted); }
+  .sobre :global(.cita) { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .sobre :global(.cita blockquote) { font-size: 1.05rem; line-height: 1.6; }
+  .sobre :global(.cita p) { margin: 0; }
 </style>
