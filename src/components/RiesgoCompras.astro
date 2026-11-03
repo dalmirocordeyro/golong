@@ -1,0 +1,52 @@
+---
+// Riesgo país (promedio mensual) y compras netas de divisas del BCRA, mes a mes.
+import { renderDualChart } from '../lib/chart';
+import { cruceMensual, lecturas } from '../lib/bcra';
+import { dmy } from '../lib/format';
+import type { ComprasBcra, Point } from '../lib/types';
+
+interface Props { riesgo: Point[]; bcra: ComprasBcra; meses?: number; height?: number }
+const { riesgo, bcra, meses = 24, height = 380 } = Astro.props;
+
+const cruce = cruceMensual(riesgo, bcra, meses);
+const items = lecturas(cruce, bcra);
+const cfg = {
+  type: 'dual',
+  months: cruce.map((m) => m.mes),
+  top: cruce.map((m) => (m.riesgo == null ? null : Math.round(m.riesgo))),
+  bottom: cruce.map((m) => m.compras),
+  topLabel: 'Riesgo país (puntos, promedio del mes)',
+  bottomLabel: 'Compras netas del BCRA (millones de US$)',
+  partial: cruce[cruce.length - 1]?.parcial ?? false,
+  height,
+};
+const svg = renderDualChart({ ...cfg, width: 800 });
+const json = JSON.stringify(cfg).replace(/</g, '\\u003c');
+---
+{cruce.length >= 6 && (
+  <div class="card chart-card" data-chart>
+    <div class="chart-toolbar">
+      <div>
+        <h2>Riesgo país y compras de dólares del BCRA</h2>
+        <p class="muted mt-0" style="font-size:.86rem;margin-top:2px">Mes a mes, últimos {cruce.length} meses. Las columnas verdes son compras y las rojas, ventas.</p>
+      </div>
+    </div>
+    <div class="chart" tabindex="0" role="img" aria-label="Riesgo país promedio y compras netas de divisas del Banco Central por mes. Usá las flechas para recorrer los meses." set:html={svg} />
+    <script type="application/json" set:html={json} />
+    {items.length > 0 && (
+      <div class="chart-stats lecturas">
+        {items.map((it) => (
+          <div>
+            <span>{it.titulo}</span>
+            <b>{it.valor}</b>
+            <small>{it.detalle}</small>
+          </div>
+        ))}
+      </div>
+    )}
+    <p class="chart-note">Las dos series se muestran juntas para compararlas; que se muevan a la par no implica que una cause la otra. Compras netas de divisas del Banco Central en el mercado de cambios, según el BCRA (último dato: {dmy(bcra.fecha)}).</p>
+  </div>
+)}
+<script>
+  import '../scripts/charts';
+</script>
