@@ -8,7 +8,8 @@ const { data } = Astro.props;
 const d = data.dollars;
 const btc = data.crypto.find((c) => c.id === 'bitcoin');
 ---
-<div class="strip" aria-label="Indicadores principales">
+<!-- data-nosnippet: que Google no use estos precios (cambian todo el tiempo) como texto del resultado. -->
+<div class="strip" aria-label="Indicadores principales" data-nosnippet>
   <div class="wrap strip-row">
     {(['blue', 'oficial', 'mep', 'ccl', 'cripto'] as const).map((s) => (
       <a href={`/dolar/${s}`}>
