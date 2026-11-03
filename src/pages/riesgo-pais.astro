@@ -5,6 +5,7 @@ import AdSlot from '../components/AdSlot.astro';
 import Faq from '../components/Faq.astro';
 import StatTile from '../components/StatTile.astro';
 import Delta from '../components/Delta.astro';
+import RiesgoCompras from '../components/RiesgoCompras.astro';
 import { getSiteData } from '../lib/data';
 import { dmy, num } from '../lib/format';
 import { rangeStats, sliceRange } from '../lib/series';
@@ -47,6 +48,12 @@ const faq = [
       ranges={['1m', '3m', '6m', '1a', '5a', 'max']}
     />
   </section>
+
+  {data.bcra && (
+    <section class="section">
+      <RiesgoCompras riesgo={r.history} bcra={data.bcra} />
+    </section>
+  )}
 
   <AdSlot slot="inline" />
 
