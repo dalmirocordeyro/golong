@@ -367,6 +367,18 @@ main { padding-bottom: 48px; }
 .chart-stats div { display: flex; flex-direction: column; gap: 2px; }
 .chart-stats span { font-size: 0.76rem; color: var(--muted); }
 .chart-stats b { font-size: 0.95rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.chart-stats small { font-size: 0.76rem; color: var(--muted); line-height: 1.35; }
+.chart-stats.lecturas { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.chart-note { font-size: 0.78rem; color: var(--muted); margin: 0; }
+.chart-svg .bar.pos { fill: var(--up); }
+.chart-svg .bar.neg { fill: var(--down); }
+.chart-svg .bar.partial { opacity: 0.5; }
+.chart-svg .bar.partial.dim { opacity: 0.3; }
+.chart-svg .panel-label { fill: var(--text-2); font-size: 11.5px; font-weight: 600; }
+.tooltip .tt-row.pos { --c: var(--up); }
+.tooltip .tt-row.neg { --c: var(--down); }
+.tooltip .tt-row.zero { --c: var(--baseline); }
+.tooltip .tt-row.pos i, .tooltip .tt-row.neg i { height: 8px; width: 8px; }
 
 /* ───────────── Tablas ───────────── */
 .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
