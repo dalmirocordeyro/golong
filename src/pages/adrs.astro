@@ -18,11 +18,11 @@ const cols: Column<Quote>[] = [
   { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `US$${compact(r.monto)}`, opt: true },
 ];
 const faq = [
-  { q: '¿Qué es un ADR?', a: '<p>Un American Depositary Receipt: un certificado que permite que las acciones de una empresa extranjera se negocien en la bolsa de Nueva York. Muchas empresas argentinas, como YPF o Grupo Galicia, tienen ADRs.</p>' },
+  { q: '¿Qué es un ADR?', a: '<p>Un American Depositary Receipt: un certificado que permite que las acciones de una empresa extranjera se negocien en la bolsa de Nueva York. Muchas empresas argentinas, como YPF, tienen ADRs.</p>' },
   { q: '¿Por qué miran los ADRs cuando la bolsa porteña está cerrada?', a: '<p>Porque Wall Street opera en otro horario y en días que en Argentina pueden ser feriado. Los ADRs anticipan cómo puede abrir el mercado local.</p>' },
 ];
 ---
-<Base title="ADRs argentinos hoy: YPF, Galicia y más en Wall Street" description="Cotización de los ADRs argentinos hoy en Nueva York: YPF, Grupo Galicia, Pampa, Mercado Libre, Globant, Vista y más, con variación diaria." crumbs={[{ label: 'ADRs', href: '/adrs' }]}>
+<Base title="ADRs argentinos hoy: YPF y más en Wall Street" description="Cotización de los ADRs argentinos hoy en Nueva York: YPF, Pampa, Mercado Libre, Globant, Vista y más, con variación diaria." crumbs={[{ label: 'ADRs', href: '/adrs' }]}>
   <section class="page-head">
     <h1>ADRs argentinos hoy</h1>
     <p class="lead">Empresas argentinas (y latinoamericanas con fuerte presencia local) que cotizan en Wall Street. Precios en dólares, con demora.</p>
