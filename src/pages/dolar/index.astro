@@ -34,7 +34,7 @@ const faq = [
       <table class="tbl">
         <caption class="visually-hidden">Cotización de todos los tipos de dólar</caption>
         <thead>
-          <tr><th scope="col">Dólar</th><th scope="col">Compra</th><th scope="col">Venta</th><th scope="col">Variación</th><th scope="col">Brecha</th><th scope="col" class="opt">Actualizado</th></tr>
+          <tr><th scope="col">Dólar</th><th scope="col">Compra</th><th scope="col">Venta</th><th scope="col" class="opt">Variación</th><th scope="col" class="opt">Brecha</th><th scope="col" class="opt">Actualizado</th></tr>
         </thead>
         <tbody>
           {DOLLARS.map((m) => {
@@ -44,8 +44,8 @@ const faq = [
                 <th scope="row"><a class="sym" href={`/dolar/${m.slug}`}>{x.nombre}</a><small class="muted" style="display:block;font-size:.76rem">{m.resumen}</small></th>
                 <td>{x.compra != null ? <Price value={x.compra} live={`d:${m.slug}:compra`} /> : '—'}</td>
                 <td><b><Price value={x.venta} live={`d:${m.slug}:venta`} /></b></td>
-                <td><Delta value={x.varPct} plain live={`d:${m.slug}:var`} /></td>
-                <td>{m.slug === 'oficial' ? '—' : <span data-live={`brecha:${m.slug}`}>{pct(brecha(d, m.slug), 1, false)}</span>}</td>
+                <td class="opt"><Delta value={x.varPct} plain live={`d:${m.slug}:var`} /></td>
+                <td class="opt">{m.slug === 'oficial' ? '—' : <span data-live={`brecha:${m.slug}`}>{pct(brecha(d, m.slug), 1, false)}</span>}</td>
                 <td class="opt"><Updated iso={x.fecha} live={`d:${m.slug}:time`} /></td>
               </tr>
             );
