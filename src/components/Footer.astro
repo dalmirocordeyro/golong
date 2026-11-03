@@ -6,6 +6,11 @@ import SobreProyecto from './SobreProyecto.astro';
 interface Props { generatedAt: string }
 const { generatedAt } = Astro.props;
 const year = new Date(generatedAt).getFullYear();
+// Perfiles públicos del autor (GitHub, LinkedIn): enlazados en todas las páginas.
+const perfiles = SITE.author.sameAs.map((url) => ({
+  url,
+  nombre: url.includes('github') ? 'GitHub' : url.includes('linkedin') ? 'LinkedIn' : url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''),
+}));
 // Frases de búsqueda frecuentes, cada una enlazada a su página.
 const TAGS: [string, string][] = [
   ['Dólar hoy Argentina', '/dolar'], ['Dólar blue hoy', '/dolar/blue'], ['Dólar oficial', '/dolar/oficial'], ['Dólar MEP', '/dolar/mep'],
@@ -69,7 +74,10 @@ const TAGS: [string, string][] = [
     </section>
     <div class="footer-bottom">
       <span>© {year} {SITE.name}</span>
-      <span>Hecho por <a href="/sobre-mi" rel="author">{SITE.author.name}</a></span>
+      <span>
+        Hecho por <a href="/sobre-mi" rel="author">{SITE.author.name}</a>
+        {perfiles.map((p) => <> · <a href={p.url} rel="me noopener" target="_blank">{p.nombre}</a></>)}
+      </span>
     </div>
   </div>
 </footer>
