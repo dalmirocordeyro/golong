@@ -31,7 +31,6 @@ export const SITE = {
     name: 'Dalmiro Cordeyro',
     /** Perfiles públicos: ayudan a que Google asocie el sitio con vos. */
     sameAs: [
-      'https://github.com/dalmirocordeyro',
       // Agregá acá otros perfiles públicos. Poné también
       // el link a este sitio en cada perfil: el vínculo tiene que ir en los dos sentidos.
     ] as string[],
