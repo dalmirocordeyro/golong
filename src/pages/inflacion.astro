@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import LineChart from '../components/LineChart.astro';
 import BarChart from '../components/BarChart.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import StatTile from '../components/StatTile.astro';
 import { getSiteData } from '../lib/data';
 import { monthYear, pct } from '../lib/format';
@@ -14,11 +13,6 @@ const last24 = inf.mensual.slice(-24);
 const table = inf.mensual.slice(-12).reverse().map((p) => ({ fecha: p[0], mensual: p[1], interanual: inf.interanual.find((x) => x[0] === p[0])?.[1] ?? null }));
 const prevMonth = inf.mensual[inf.mensual.length - 2];
 const year = inf.ultimo[0].slice(0, 4);
-const faq = [
-  { q: '¿Quién mide la inflación en Argentina?', a: '<p>El INDEC, a través del Índice de Precios al Consumidor (IPC). Publica el dato de cada mes a mediados del mes siguiente, según su calendario oficial.</p>' },
-  { q: '¿Qué diferencia hay entre inflación mensual, interanual y acumulada?', a: '<p>La <strong>mensual</strong> compara los precios con el mes anterior. La <strong>interanual</strong> los compara con el mismo mes del año anterior. La <strong>acumulada</strong> suma (componiendo) la inflación desde enero del año en curso.</p>' },
-  { q: '¿Cómo se calcula la inflación acumulada?', a: '<p>Multiplicando los factores de cada mes: (1 + inflación de enero) × (1 + inflación de febrero) × … − 1. No es la suma simple de los porcentajes.</p>' },
-];
 ---
 <Base title="Inflación en Argentina: último dato del INDEC y evolución" description="Inflación en Argentina: último dato mensual del IPC del INDEC, inflación interanual, acumulada del año y gráficos históricos." crumbs={[{ label: 'Inflación', href: '/inflacion' }]}>
   <section class="page-head">
@@ -68,11 +62,5 @@ const faq = [
     <p class="tbl-foot">Fuente: INDEC, vía ArgentinaDatos.</p>
   </section>
 
-  <section class="section card prose">
-    <h2 class="mt-0">Inflación y dólar</h2>
-    <p>Comparar la inflación con la suba del dólar ayuda a entender si el peso gana o pierde poder de compra frente a la moneda estadounidense. Si en un período los precios suben más que el dólar, se dice que hay "atraso cambiario"; si el dólar sube más que los precios, el peso se deprecia en términos reales.</p>
-    <p>Para ver si una inversión en pesos le gana a la inflación, probá nuestra <a href="/herramientas/plazo-fijo">calculadora de plazo fijo vs. dólar e inflación</a>.</p>
-  </section>
 
-  <Faq items={faq} />
 </Base>
