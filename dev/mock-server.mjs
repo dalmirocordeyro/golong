@@ -120,7 +120,28 @@ function bcraCompras() {
   return { status: 200, metadata: { resultset: { count: detalle.length, offset: 0, limit: 3000 } }, results: [{ idVariable: 78, detalle }] };
 }
 
+// Yahoo Finance: cierre semanal de 5 años, en la forma de /v8/finance/chart.
+function yahooChart(sym) {
+  const base = sym.replace(/\.SA$/, '').replace('-', '');
+  const row = fx.cedears.find((x) => x[0] === base);
+  const end = row ? Math.max(5, row[7] / 900) : 100;
+  const n = 262;
+  const series = walkBack('y' + sym, end, n, 1.18, 0.045);
+  const t0 = Date.UTC(2021, 8, 20, 4) / 1000;
+  return {
+    chart: {
+      result: [{
+        meta: { currency: sym.endsWith('.SA') ? 'BRL' : 'USD', symbol: sym },
+        timestamp: series.map((_, i) => t0 + i * 7 * 86400),
+        indicators: { quote: [{ close: series.map((v, i) => (i === 40 ? null : +v.toFixed(4))) }] },
+      }],
+      error: null,
+    },
+  };
+}
+
 const routes = [
+  [/^\/query1\.finance\.yahoo\.com\/v8\/finance\/chart\/([A-Za-z0-9.\-]+)$/, (m) => yahooChart(decodeURIComponent(m[1]))],
   [/^\/dolarapi\.com\/v1\/dolares$/, () => fx.dol],
   [/^\/dolarapi\.com\/v1\/cotizaciones$/, () => fx.cot],
   [/^\/api\.argentinadatos\.com\/v1\/cotizaciones\/dolares\/([a-z]+)$/, (m) => dollarHistory(m[1])],
