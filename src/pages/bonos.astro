@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import DataTable, { type Column } from '../components/DataTable.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import StatTile from '../components/StatTile.astro';
 import Delta from '../components/Delta.astro';
 import Updated from '../components/Updated.astro';
@@ -31,11 +30,6 @@ const colsPesos: Column<Quote>[] = [
   { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `$${price(r.price)}` },
   { key: 'pct', label: 'Var. %', v: (r) => r.pct, html: (r) => deltaHtml(r.pct, { plain: true }) },
   { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `$${compact(r.monto)}`, opt: true },
-];
-const faq = [
-  { q: '¿Qué diferencia hay entre los bonos AL y GD?', a: '<p>Los <strong>AL</strong> (Bonares) se rigen por ley argentina y los <strong>GD</strong> (Globales) por ley de Nueva York. Tienen flujos de pago muy parecidos, pero los Globales suelen cotizar algo más caros porque los inversores valoran la jurisdicción extranjera.</p>' },
-  { q: '¿Por qué el precio es "cada 100 nominales"?', a: '<p>Los bonos cotizan por cada 100 unidades de valor nominal. Si el AL30D cotiza US$55, comprar 100 nominales cuesta aproximadamente US$55 más comisiones.</p>' },
-  { q: '¿Qué es el MEP implícito de un bono?', a: '<p>Es el tipo de cambio que surge de dividir el precio del bono en pesos por su precio en dólares. Muestra a qué dólar estarías comprando si hacés la operación MEP con ese bono. <a href="/dolar/mep">Más sobre el dólar MEP</a>.</p>' },
 ];
 ---
 <Base title="Bonos argentinos hoy: AL30, GD30 y soberanos en dólares" description="Cotización de los bonos soberanos argentinos hoy: AL30, GD30, AL35, GD35, AE38 y más. Precio en dólares y en pesos, variación y MEP implícito." crumbs={[{ label: 'Bonos', href: '/bonos' }]}>
@@ -69,5 +63,4 @@ const faq = [
     </section>
   )}
 
-  <Faq items={faq} />
 </Base>
