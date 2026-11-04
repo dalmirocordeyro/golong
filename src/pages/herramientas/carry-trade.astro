@@ -1,7 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
 import LineChart from '../../components/LineChart.astro';
 import Updated from '../../components/Updated.astro';
 import { getSiteData } from '../../lib/data';
@@ -32,37 +31,15 @@ const cfg = {
 };
 const json = JSON.stringify(cfg).replace(/</g, '\\u003c');
 
-const faq = [
-  {
-    q: '¿Qué es el carry trade?',
-    a: '<p>Es vender dólares (o no comprarlos), poner los pesos a tasa y volver a dólares más adelante. Funciona si la tasa en pesos le gana a lo que sube el dólar en ese período. Si el dólar salta más que la tasa, se pierde en dólares, y puede ser mucho.</p>',
-  },
-  {
-    q: '¿Qué es el dólar de equilibrio?',
-    a: '<p>Es el valor al que tendría que llegar el dólar MEP el día del vencimiento para que dé exactamente lo mismo haber comprado dólares hoy o haber hecho la tasa en pesos. Si el dólar termina por debajo, ganó el carry; si termina por encima, hubiera convenido el dólar.</p>',
-  },
-  {
-    q: '¿Qué son las LECAP y las BONCAP?',
-    a: '<p>Son letras y bonos del Tesoro en pesos a tasa fija. No pagan intereses en el camino: se compran por debajo de lo que van a pagar y al vencimiento devuelven un monto ya conocido. La diferencia entre lo que pagás y lo que cobrás es el rendimiento. Se llaman letras cuando el plazo original es menor a un año y bonos cuando es mayor.</p>',
-  },
-  {
-    q: '¿Puedo vender antes del vencimiento?',
-    a: '<p>Sí, cotizan todos los días. Pero el precio del día depende de las tasas del momento: si las tasas suben, el precio baja y podés vender con pérdida. Los rendimientos de esta página suponen que la mantenés hasta el vencimiento.</p>',
-  },
-  {
-    q: '¿Los precios son de ahora?',
-    a: '<p>Los precios de las letras vienen de data912 y se actualizan con cada actualización del sitio, con demora respecto al mercado. El dólar MEP se refresca solo cada minuto mientras tenés la página abierta. Verificá siempre en tu broker antes de operar.</p>',
-  },
-];
 ---
 <Base
   title="Calculadora de carry trade: LECAP en pesos vs. dólar MEP"
   description="Calculá cuánto rinde el carry trade con letras del Tesoro en pesos (LECAP y BONCAP) contra el dólar MEP: tasa efectiva mensual, dólar de equilibrio y simulador por escenarios."
-  crumbs={[{ label: 'Herramientas', href: '/herramientas/conversor' }, { label: 'Carry trade', href: '/herramientas/carry-trade' }]}
+  crumbs={[{ label: 'Carry trade', href: '/herramientas/carry-trade' }]}
 >
   <section class="page-head">
     <h1>Carry trade: pesos vs. dólar</h1>
-    <p class="lead">Poner pesos a tasa fija y volver al dólar más adelante. Acá ves cuánto rinde cada letra del Tesoro y hasta dónde puede subir el dólar antes de que el negocio deje de convenir.</p>
+    <p class="lead">Letras del Tesoro a tasa fija: rendimiento y dólar MEP de equilibrio de cada una.</p>
     <div class="status-line">
       <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
       <Updated iso={data.generatedAt} prefix="Precios de " />
@@ -120,21 +97,16 @@ const faq = [
         <aside class="grid" style="align-content:start">
           <article class="card">
             <h2 class="card-title">Dólar de equilibrio</h2>
-            <p class="mt-1" style="margin-bottom:6px">Hasta acá puede subir el MEP sin que pierdas:</p>
-            <div class="mid" data-o="eq">—</div>
-            <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="eqtxt">—</p>
+            <div class="mid mt-1" data-o="eq">—</div>
           </article>
           <article class="card">
             <h2 class="card-title">Resultado en dólares</h2>
             <p class="mt-1" style="margin-bottom:6px">Con el escenario elegido:</p>
             <div class="mid" data-o="usd">—</div>
-            <p class="muted mt-1" style="font-size:.86rem;margin-bottom:0" data-o="usdtxt">—</p>
           </article>
         </aside>
       </div>
       <script type="application/json" id="ct-data" set:html={json} />
-
-      <p class="disclaimer">El carry trade no es una apuesta gratis: si el dólar salta, la pérdida medida en dólares puede ser grande y rápida. Esto es información, no una recomendación de inversión.</p>
 
       <AdSlot slot="inline" />
 
@@ -177,9 +149,8 @@ const faq = [
           </table>
         </div>
         <p class="tbl-foot">
-          Precios de data912; vencimientos y pago final, de las licitaciones del Tesoro. Los días se cuentan desde la liquidación
-          (plazo 24 horas) hasta el vencimiento. La tabla no descuenta comisiones: en el simulador de arriba podés cargar la de tu
-          broker, que en plazos cortos pesa bastante. El dólar de equilibrio usa el MEP de ${price(mep)}.
+          Precios de data912; vencimientos y pago final, de las licitaciones del Tesoro. Días desde la liquidación (24 horas)
+          hasta el vencimiento. Sin comisiones. Dólar de equilibrio con el MEP de ${price(mep)}.
         </p>
       </section>
 
@@ -202,8 +173,8 @@ const faq = [
           series={equilibrio}
           format="ars"
           label="Dólar MEP de equilibrio de cada letra comparado con el MEP de hoy"
-          title="Hasta dónde puede subir el dólar"
-          subtitle="Cada punto es el MEP que dejaría empatada esa letra contra comprar dólares hoy."
+          title="Dólar MEP de equilibrio"
+          subtitle="MEP de equilibrio de cada letra según su vencimiento."
           ranges={false}
           stats={false}
           area={false}
@@ -211,29 +182,9 @@ const faq = [
         />
       </section>
 
-      <section class="section card prose">
-        <h2>Cómo leer esto</h2>
-        <p>
-          Si comprás {corta.l.ticker} y la mantenés hasta el {dmy(corta.l.vencimiento)}, cobrás {pct(corta.directo * 100, 2, false)} más
-          de lo que pagaste: {pct(corta.tem * 100, 2, false)} por mes. Para que ese rendimiento se transforme en dólares, el MEP tiene que
-          terminar por debajo de ${price(corta.eq)}, que hoy está en ${price(mep)}. Es decir, el dólar puede subir hasta
-          {' '}{pct(corta.deval * 100, 2, false)} por mes antes de que el negocio quede empatado.
-        </p>
-        <p>
-          Cuanto más largo el plazo, más tasa y más riesgo: {larga.l.ticker} vence el {dmy(larga.l.vencimiento)} y rinde
-          {' '}{pct(larga.tem * 100, 2, false)} mensual, pero hay {larga.dias} días por delante para que el dólar haga cualquier cosa.
-          El carry se gana de a poco y se pierde de golpe: en un salto cambiario de 20%, varios meses de tasa se van en una semana.
-        </p>
-        <p>
-          Si preferís algo más simple, mirá la <a href="/herramientas/plazo-fijo">calculadora de plazo fijo</a>, que hace la misma
-          comparación con la tasa de los bancos. También podés ver el <a href="/dolar/mep">dólar MEP</a> y los
-          {' '}<a href="/bonos">bonos soberanos</a>.
-        </p>
-      </section>
     </>
   )}
 
-  <Faq items={faq} />
 </Base>
 
 <script>
@@ -285,12 +236,8 @@ const faq = [
       out('tem', pct(tem * 100, 2, false));
       out('tea', pct(tea * 100, 1, false));
       out('eq', `$${price(eq)}`);
-      const sube = (eq / cfg.mep - 1) * 100;
-      const mensual = ((1 + directo) ** (30 / dias) - 1) * 100;
-      out('eqtxt', `El MEP está en $${price(cfg.mep)}. Puede subir ${pct(sube, 1, false)} (${pct(mensual, 2, false)} por mes) hasta el ${dias === 1 ? 'vencimiento' : 'vencimiento'} sin que pierdas. Por encima de eso, hubiera convenido comprar dólares.`);
 
       out('usd', `${e.usdDif >= -0.005 ? '+' : '−'}US$${num(Math.abs(e.usdDif), 2)}`);
-      out('usdtxt', `Con el MEP a $${price(mepFinal)} al vencimiento, los $${price(m)} se transforman en US$${num(e.usdFinal, 2)}, contra los US$${num(e.usdHoy, 2)} que comprarías hoy: ${pct(e.usdPct * 100, 2)} en dólares.`);
 
       // El dólar de equilibrio de la tabla también sigue al MEP en vivo.
       for (const el of document.querySelectorAll<HTMLElement>('[data-eq]')) {
