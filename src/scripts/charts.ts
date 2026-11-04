@@ -303,7 +303,8 @@ function setupDual(plot: HTMLElement, cfg: DualCfg) {
   render();
 }
 
-document.querySelectorAll<HTMLElement>('[data-chart]').forEach((root) => {
+/** Activa un gráfico: lee su configuración del <script type="application/json"> interno. */
+export function mount(root: HTMLElement) {
   const plot = root.querySelector<HTMLElement>('.chart');
   const cfgEl = root.querySelector('script[type="application/json"]');
   if (!plot || !cfgEl) return;
@@ -311,5 +312,7 @@ document.querySelectorAll<HTMLElement>('[data-chart]').forEach((root) => {
   if (cfg.type === 'bar') setupBar(plot, cfg);
   else if (cfg.type === 'dual') setupDual(plot, cfg);
   else setupLine(root, plot, cfg);
-});
+}
+
+document.querySelectorAll<HTMLElement>('[data-chart]').forEach(mount);
 
