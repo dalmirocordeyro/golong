@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import Price from '../components/Price.astro';
 import Delta from '../components/Delta.astro';
 import { getSiteData } from '../lib/data';
@@ -9,11 +8,6 @@ import { compact, num } from '../lib/format';
 
 const data = await getSiteData();
 const rate = data.dollars.cripto.venta;
-const faq = [
-  { q: '¿De dónde salen los precios de las criptomonedas?', a: '<p>De CoinGecko, que promedia precios de cientos de exchanges en todo el mundo. El precio en pesos es una referencia: multiplicamos el precio en dólares por el <a href="/dolar/cripto">dólar cripto</a>.</p>' },
-  { q: '¿Qué es una stablecoin?', a: '<p>Una criptomoneda diseñada para mantener un valor estable, generalmente un dólar. USDT y USDC son las más usadas en Argentina para ahorrar o mover dinero.</p>' },
-  { q: '¿Es seguro invertir en cripto?', a: '<p>Las criptomonedas son activos muy volátiles: pueden subir o bajar mucho en poco tiempo. Informate bien y no inviertas dinero que puedas necesitar. Esto no es una recomendación de inversión.</p>' },
-];
 ---
 <Base title="Criptomonedas hoy: precio de Bitcoin, Ethereum y USDT en dólares y pesos" description="Precio de Bitcoin, Ethereum, USDT, Solana y las principales criptomonedas hoy, en dólares y en pesos argentinos, actualizado en vivo." crumbs={[{ label: 'Cripto', href: '/cripto' }]}>
   <section class="page-head">
@@ -48,5 +42,4 @@ const faq = [
 
   <AdSlot slot="inline" />
 
-  <Faq items={faq} />
 </Base>
