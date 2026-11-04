@@ -43,28 +43,7 @@ const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : nu
     </div>
   </section>
 
-  <div class="grid g-main">
-    <QuoteCard d={d} link={false} headingLevel="h2" />
-    <aside class="card" aria-labelledby="conv-title" data-conv data-slug={slug} data-venta={d.venta} data-compra={d.compra ?? d.venta}>
-      <h2 id="conv-title" class="mt-0" style="font-size:1rem">Calculadora rápida</h2>
-      <p class="muted" style="font-size:.84rem;margin:4px 0 14px">Al precio de {d.compra != null && d.compra !== d.venta ? 'venta (comprar) y compra (vender)' : 'referencia'} del {d.nombre.toLowerCase()}.</p>
-      <div class="field">
-        <label for="conv-usd">Dólares</label>
-        <div class="input-group"><span class="affix">US$</span><input id="conv-usd" class="input" inputmode="decimal" autocomplete="off" value="100" data-conv-usd /></div>
-      </div>
-      <div class="result-list mt-1">
-        <div class="result-row"><span>Para comprarlos pagás</span><b data-conv-buy>${price(100 * d.venta)}</b></div>
-        {d.compra != null && d.compra !== d.venta && <div class="result-row"><span>Si los vendés recibís</span><b data-conv-sell>${price(100 * d.compra)}</b></div>}
-      </div>
-      <div class="field mt-2">
-        <label for="conv-ars">Pesos</label>
-        <div class="input-group"><span class="affix">$</span><input id="conv-ars" class="input" inputmode="decimal" autocomplete="off" value="100.000" data-conv-ars /></div>
-      </div>
-      <div class="result-list mt-1">
-        <div class="result-row"><span>Te alcanza para</span><b data-conv-get>US${price(100000 / d.venta)}</b></div>
-      </div>
-    </aside>
-  </div>
+  <QuoteCard d={d} link={false} headingLevel="h2" />
 
   <section class="section">
     <LineChart
@@ -132,36 +111,3 @@ const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : nu
     </div>
   </nav>
 </Base>
-
-<script>
-  import { price } from '../../lib/format';
-  const box = document.querySelector<HTMLElement>('[data-conv]');
-  if (box) {
-    let venta = Number(box.dataset.venta);
-    let compra = Number(box.dataset.compra);
-    const usd = box.querySelector<HTMLInputElement>('[data-conv-usd]')!;
-    const ars = box.querySelector<HTMLInputElement>('[data-conv-ars]')!;
-    const parse = (s: string) => Number(s.replace(/\./g, '').replace(',', '.')) || 0;
-    const set = (sel: string, txt: string) => {
-      const el = box.querySelector(sel);
-      if (el) el.textContent = txt;
-    };
-    const calc = () => {
-      const u = parse(usd.value);
-      const a = parse(ars.value);
-      set('[data-conv-buy]', `$${price(u * venta)}`);
-      set('[data-conv-sell]', `$${price(u * compra)}`);
-      set('[data-conv-get]', `US$${price(a / venta)}`);
-    };
-    usd.addEventListener('input', calc);
-    ars.addEventListener('input', calc);
-    document.addEventListener('dolarahora:dollars', (e) => {
-      const d = (e as CustomEvent).detail[box.dataset.slug!];
-      if (d) {
-        venta = d.venta;
-        compra = d.compra ?? d.venta;
-        calc();
-      }
-    });
-  }
-</script>
