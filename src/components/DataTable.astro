@@ -11,8 +11,8 @@ export interface Column<T> {
   opt?: boolean;
   align?: 'left' | 'right';
 }
-interface Props { rows: any[]; columns: Column<any>[]; caption: string; sortKey?: string; sortDir?: 'ascending' | 'descending'; note?: string; id?: string }
-const { rows, columns, caption, sortKey, sortDir = 'descending', note, id } = Astro.props;
+interface Props { rows: any[]; columns: Column<any>[]; caption: string; sortKey?: string; sortDir?: 'ascending' | 'descending'; note?: string; id?: string; rowKey?: (row: any) => string }
+const { rows, columns, caption, sortKey, sortDir = 'descending', note, id, rowKey } = Astro.props;
 ---
 <div class="tbl-wrap">
   <table class="tbl" data-sortable id={id}>
@@ -28,7 +28,7 @@ const { rows, columns, caption, sortKey, sortDir = 'descending', note, id } = As
     </thead>
     <tbody>
       {rows.map((r) => (
-        <tr>
+        <tr data-key={rowKey?.(r)}>
           {columns.map((c, i) => {
             const v = c.v?.(r);
             return i === 0 ? (
@@ -55,6 +55,7 @@ const { rows, columns, caption, sortKey, sortDir = 'descending', note, id } = As
         heads.forEach((h) => h.querySelector('button') && h.setAttribute('aria-sort', 'none'));
         th.setAttribute('aria-sort', dir);
         const body = table.tBodies[0];
+        table.dispatchEvent(new CustomEvent('tbl:sort'));
         const rows = [...body.rows];
         const val = (r: HTMLTableRowElement) => {
           const raw = (r.cells[col] as HTMLElement).dataset.v ?? '';
