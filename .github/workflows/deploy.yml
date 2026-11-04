@@ -38,6 +38,19 @@ jobs:
 
       - run: npm ci
 
+      # Historia de 5 años de cada CEDEAR (Yahoo Finance): se descarga una vez por día
+      # y se guarda entre corridas para no pedirla cada 15 minutos.
+      - name: Fecha de hoy
+        id: hoy
+        run: echo "d=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Historia de CEDEARs guardada
+        uses: actions/cache@v4
+        with:
+          path: .cache/yahoo
+          key: yahoo-${{ steps.hoy.outputs.d }}
+          restore-keys: yahoo-
+
       - name: Generar sitio con datos actuales
         run: npm run build
 
