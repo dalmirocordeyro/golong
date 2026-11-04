@@ -9,10 +9,11 @@ const rows = [
   { key: 'argentinadatos', name: 'ArgentinaDatos', url: 'https://argentinadatos.com', what: 'Historial del dólar, riesgo país (JP Morgan), inflación (INDEC) y tasas de plazo fijo (BCRA).', freq: 'En cada actualización del sitio.' },
   { key: 'data912', name: 'data912', url: 'https://data912.com', what: 'Acciones, bonos, CEDEARs y ADRs. Precios con demora.', freq: 'En cada actualización del sitio.' },
   { key: 'bcra', name: 'Banco Central (BCRA)', url: 'https://www.bcra.gob.ar/apis-banco-central/', what: 'Compras y ventas de divisas del Banco Central en el mercado de cambios.', freq: 'En cada actualización del sitio. El BCRA publica con 2 o 3 días hábiles de demora.' },
+  { key: 'yahoo', name: 'Yahoo Finance', url: 'https://finance.yahoo.com', what: 'Historial de 5 años de las acciones y ETFs que respaldan cada CEDEAR.', freq: 'Una vez por día.' },
   { key: 'coingecko', name: 'CoinGecko', url: 'https://www.coingecko.com', what: 'Precios y capitalización de criptomonedas.', freq: 'Cada dos minutos en tu navegador; en cada actualización del sitio.' },
 ] as const;
 ---
-<Base title="Fuentes de datos" description="De dónde salen los datos que muestra el sitio: DolarApi, ArgentinaDatos, data912, el Banco Central y CoinGecko. Frecuencia de actualización y estado de cada fuente." crumbs={[{ label: 'Fuentes de datos', href: '/fuentes' }]}>
+<Base title="Fuentes de datos" description="De dónde salen los datos que muestra el sitio: DolarApi, ArgentinaDatos, data912, el Banco Central, Yahoo Finance y CoinGecko. Frecuencia de actualización y estado de cada fuente." crumbs={[{ label: 'Fuentes de datos', href: '/fuentes' }]}>
   <section class="page-head">
     <h1>Fuentes de datos</h1>
     <p class="lead">Todo lo que ves acá proviene de fuentes públicas y gratuitas. Gracias a quienes las mantienen.</p>
@@ -29,7 +30,7 @@ const rows = [
               <th scope="row"><a href={r.url} rel="noopener" target="_blank">{r.name}</a></th>
               <td style="text-align:left;white-space:normal;min-width:220px">{r.what}</td>
               <td class="opt" style="text-align:left;white-space:normal;min-width:180px">{r.freq}</td>
-              <td>{s[r.key].ok ? <span class="pill" data-state="open"><span class="dot"></span>OK</span> : <span class="pill" data-state="stale" title={s[r.key].error}><span class="dot"></span>Datos anteriores</span>}</td>
+              <td>{!(r.key in s) ? <span class="muted">—</span> : s[r.key as keyof typeof s].ok ? <span class="pill" data-state="open"><span class="dot"></span>OK</span> : <span class="pill" data-state="stale" title={s[r.key as keyof typeof s].error}><span class="dot"></span>Datos anteriores</span>}</td>
             </tr>
           ))}
         </tbody>
