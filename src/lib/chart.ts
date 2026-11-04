@@ -72,7 +72,9 @@ function yDomain(values: number[], includeZero: boolean, ticks = 4) {
   if (min === max) { min -= Math.abs(min) * 0.05 || 1; max += Math.abs(max) * 0.05 || 1; }
   const pad = (max - min) * 0.06;
   const step = niceStep(max - min + 2 * pad, ticks);
+  // Si todos los valores son positivos, el eje no baja de cero.
   const lo = includeZero && min >= 0 ? 0 : Math.floor((min - pad) / step) * step;
+  if (min >= 0 && lo < 0) return { lo: 0, hi: Math.ceil((max + pad) / step) * step, step };
   const hi = Math.ceil((max + pad) / step) * step;
   return { lo, hi, step };
 }
