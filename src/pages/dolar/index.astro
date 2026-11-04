@@ -3,7 +3,6 @@ import Base from '../../layouts/Base.astro';
 import MiniDollar from '../../components/MiniDollar.astro';
 import LineChart from '../../components/LineChart.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
 import Price from '../../components/Price.astro';
 import Delta from '../../components/Delta.astro';
 import Updated from '../../components/Updated.astro';
@@ -14,10 +13,6 @@ import { pct } from '../../lib/format';
 
 const data = await getSiteData();
 const d = data.dollars;
-const faq = [
-  { q: '¿Cuántos tipos de dólar hay en Argentina?', a: '<p>Los más seguidos son el oficial (bancos), el blue (informal), el MEP y el CCL (a través de la bolsa), el cripto (stablecoins), el tarjeta (consumos en el exterior) y el mayorista (bancos y empresas). Cada uno responde a un mercado y a reglas distintas.</p>' },
-  { q: '¿Cuál es el dólar más barato para comprar?', a: '<p>Depende del momento y de tu situación. En esta página podés comparar el precio de venta de cada uno en tiempo real. Tené en cuenta comisiones, impuestos y plazos de cada canal. Esto no es una recomendación de inversión.</p>' },
-];
 ---
 <Base title="Cotizaciones del dólar hoy: todos los tipos de cambio" description="Todos los tipos de dólar en Argentina en una tabla: blue, oficial, MEP, CCL, cripto, tarjeta y mayorista. Precio de compra y venta, variación y brecha en vivo." crumbs={[{ label: 'Dólar', href: '/dolar' }]}>
   <section class="page-head">
@@ -81,5 +76,4 @@ const faq = [
     </div>
   </section>
 
-  <Faq items={faq} />
 </Base>
