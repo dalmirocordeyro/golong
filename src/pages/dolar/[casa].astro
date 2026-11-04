@@ -3,7 +3,6 @@ import Base from '../../layouts/Base.astro';
 import QuoteCard from '../../components/QuoteCard.astro';
 import LineChart from '../../components/LineChart.astro';
 import AdSlot from '../../components/AdSlot.astro';
-import Faq from '../../components/Faq.astro';
 import { getSiteData } from '../../lib/data';
 import { DOLLARS } from '../../lib/dollars';
 import { DOLLAR_CONTENT } from '../../content/dollars';
@@ -64,7 +63,6 @@ const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : nu
       <div class="result-list mt-1">
         <div class="result-row"><span>Te alcanza para</span><b data-conv-get>US${price(100000 / d.venta)}</b></div>
       </div>
-      <p class="mt-2 mb-0" style="font-size:.84rem;margin-bottom:0"><a href="/herramientas/conversor">Conversor completo con todos los dólares →</a></p>
     </aside>
   </div>
 
@@ -124,16 +122,13 @@ const recargoTarjeta = slug === 'tarjeta' ? brecha(data.dollars, 'tarjeta') : nu
     </section>
   </div>
 
-  <section class="section card prose" set:html={c.about} />
 
-  <Faq items={c.faq} />
 
   <nav class="section" aria-label="Otros dólares">
     <h2 style="font-size:1rem;margin-bottom:10px">Otras cotizaciones</h2>
     <div class="chips">
       {others.map((o) => <a href={`/dolar/${o.slug}`}>{o.nombre}</a>)}
       <a href="/brecha">Brecha cambiaria</a>
-      <a href="/herramientas/conversor">Conversor</a>
     </div>
   </nav>
 </Base>
