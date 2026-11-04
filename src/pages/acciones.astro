@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import DataTable, { type Column } from '../components/DataTable.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import Updated from '../components/Updated.astro';
 import { getSiteData } from '../lib/data';
 import { breadth } from '../lib/derived';
@@ -25,10 +24,6 @@ const cols: Column<Quote>[] = [
   { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `$${compact(r.monto)}`, opt: true },
   { key: 'bid', label: 'Compra', v: (r) => r.bid, html: (r) => (r.bid ? `$${price(r.bid)}` : '—'), opt: true },
   { key: 'ask', label: 'Venta', v: (r) => r.ask, html: (r) => (r.ask ? `$${price(r.ask)}` : '—'), opt: true },
-];
-const faq = [
-  { q: '¿Qué es el panel líder del Merval?', a: '<p>Es el grupo de acciones más negociadas de la Bolsa de Buenos Aires, que forman parte del índice S&amp;P Merval. Incluye bancos, energéticas, utilities y otras empresas grandes.</p>' },
-  { q: '¿Los precios son en tiempo real?', a: '<p>No. Los precios pueden tener una demora de varios minutos respecto del mercado. Para operar, consultá siempre a tu broker.</p>' },
 ];
 ---
 <Base title="Acciones del Merval hoy: panel líder y panel general" description="Cotización de las acciones argentinas hoy: panel líder del Merval y panel general con precio, variación diaria y monto operado." crumbs={[{ label: 'Acciones', href: '/acciones' }]}>
@@ -72,5 +67,4 @@ const faq = [
     <DataTable rows={general} columns={cols} caption="Acciones del panel general" sortKey="monto" note="Monto operado en pesos. Compra y venta: mejores puntas al momento de la actualización." />
   </section>
 
-  <Faq items={faq} />
 </Base>
