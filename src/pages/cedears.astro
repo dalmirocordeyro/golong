@@ -7,12 +7,21 @@ import { getSiteData } from '../lib/data';
 import { compact, price } from '../lib/format';
 import { deltaHtml, escapeHtml } from '../lib/html';
 import { CEDEAR_NAMES, ETF_INFO } from '../content/names';
+import { getHistories } from '../lib/hist';
 import type { Quote } from '../lib/types';
 
 const data = await getSiteData();
 const etfOrder = Object.keys(ETF_INFO);
 const etfRows = data.cedears.filter((c) => c.symbol in ETF_INFO).sort((a, b) => etfOrder.indexOf(a.symbol) - etfOrder.indexOf(b.symbol));
 const stockRows = data.cedears.filter((c) => !(c.symbol in ETF_INFO)).sort((a, b) => b.monto - a.monto);
+// Historia de 5 años de la acción original (se abre al tocar una fila).
+const hist = await getHistories(data.cedears.map((c) => c.symbol));
+const histIndex = Object.fromEntries(
+  [...hist.values()].map((h) => [h.symbol, { n: ETF_INFO[h.symbol]?.[0] ?? CEDEAR_NAMES[h.symbol] ?? '', y: h.yahoo, c: h.currency, e: h.symbol in ETF_INFO }]),
+);
+const histJson = JSON.stringify(histIndex).replace(/</g, '\\u003c');
+const rowKey = (r: Quote) => r.symbol;
+const tocar = hist.size ? 'Tocá un CEDEAR para ver su gráfico de 5 años. ' : '';
 const cols: Column<Quote>[] = [
   { key: 'sym', label: 'CEDEAR', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(CEDEAR_NAMES[r.symbol] ?? '')}</small></span>` },
   { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `$${price(r.price)}` },
@@ -37,14 +46,140 @@ const etfCols: Column<Quote>[] = [
 
   <section class="card" aria-labelledby="etf-title">
     <div class="section-head"><div><h2 id="etf-title">ETFs</h2><p>{etfRows.length} ETFs: índices, sectores (tecnología, semiconductores, finanzas, energía…), emergentes, materias primas y cripto.</p></div></div>
-    <DataTable rows={etfRows} columns={etfCols} caption="CEDEARs de ETFs" sortKey="tipo" sortDir="ascending" />
+    <DataTable rows={etfRows} columns={etfCols} caption="CEDEARs de ETFs" sortKey="tipo" sortDir="ascending" rowKey={rowKey} note={hist.size ? 'Tocá un ETF para ver su gráfico de 5 años.' : undefined} />
   </section>
 
   <AdSlot slot="inline" />
 
   <section class="section card" aria-labelledby="ced-title">
-    <div class="section-head"><div><h2 id="ced-title">Acciones</h2><p>Las {stockRows.length} más operadas del día en BYMA. Tocá una columna para ordenar.</p></div></div>
-    <DataTable rows={stockRows} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." />
+    <div class="section-head"><div><h2 id="ced-title">Acciones</h2><p>Las {stockRows.length} más operadas del día en BYMA. {tocar}Tocá una columna para ordenar.</p></div></div>
+    <DataTable rows={stockRows} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." rowKey={rowKey} />
   </section>
 
+  <script id="hist-index" type="application/json" set:html={histJson} />
+
 </Base>
+
+<script>
+  import { mount } from '../scripts/charts';
+
+  // Al tocar una fila se abre, debajo, el gráfico de 5 años de la acción o el ETF original.
+  type Info = { n: string; y: string; c: string; e: boolean };
+  const idxEl = document.getElementById('hist-index');
+  const index: Record<string, Info> = idxEl ? JSON.parse(idxEl.textContent || '{}') : {};
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  const cache = new Map<string, Promise<{ currency: string; points: [string, number][] }>>();
+
+  let abierta: { tr: HTMLTableRowElement; detalle: HTMLTableRowElement; ro: ResizeObserver } | null = null;
+
+  function cerrar() {
+    if (!abierta) return;
+    abierta.ro.disconnect();
+    abierta.detalle.remove();
+    abierta.tr.classList.remove('open');
+    abierta.tr.setAttribute('aria-expanded', 'false');
+    abierta = null;
+  }
+
+  function abrir(table: HTMLTableElement, tr: HTMLTableRowElement, sym: string) {
+    const info = index[sym];
+    const wrap = table.closest<HTMLElement>('.tbl-wrap')!;
+    const moneda = info.c === 'USD' ? 'en dólares' : info.c === 'BRL' ? 'en reales' : `en ${esc(info.c)}`;
+    const que = info.e ? 'del ETF' : 'de la acción';
+    const titulo = `${esc(sym)}${info.n ? ` · ${esc(info.n)}` : ''}`;
+
+    const detalle = document.createElement('tr');
+    detalle.className = 'hist-row';
+    const td = document.createElement('td');
+    td.colSpan = tr.cells.length;
+    const box = document.createElement('div');
+    box.className = 'hist-box';
+    box.innerHTML = `
+      <div class="chart-card" data-chart>
+        <div class="chart-toolbar">
+          <div>
+            <h3>${titulo}</h3>
+            <p class="muted">Precio ${que} original (${esc(info.y)}) ${moneda}. Cierre semanal.</p>
+          </div>
+          <div class="seg" role="group" aria-label="Período del gráfico">
+            <button type="button" data-range="6m" aria-pressed="false">6M</button>
+            <button type="button" data-range="1a" aria-pressed="false">1A</button>
+            <button type="button" data-range="5a" aria-pressed="true">5A</button>
+          </div>
+        </div>
+        <div class="chart" tabindex="0" role="img" aria-label="Precio de ${esc(info.y)} en los últimos 5 años. Usá las flechas para recorrer los valores."><p class="muted hist-msg">Cargando…</p></div>
+        <div class="chart-stats" data-chart-stats>
+          <div><span>Variación del período</span><b data-k="chg">—</b></div>
+          <div><span>Máximo · <span data-k="maxd">—</span></span><b data-k="max">—</b></div>
+          <div><span>Mínimo · <span data-k="mind">—</span></span><b data-k="min">—</b></div>
+          <div><span>Al inicio del período</span><b data-k="first">—</b></div>
+        </div>
+      </div>`;
+    td.append(box);
+    detalle.append(td);
+    tr.after(detalle);
+    tr.classList.add('open');
+    tr.setAttribute('aria-expanded', 'true');
+
+    // El cuadro ocupa el ancho visible de la tabla aunque la tabla se deslice hacia los costados.
+    const ajustar = () => (box.style.width = `${wrap.clientWidth}px`);
+    const ro = new ResizeObserver(ajustar);
+    ro.observe(wrap);
+    ajustar();
+    abierta = { tr, detalle, ro };
+
+    if (!cache.has(sym)) {
+      cache.set(sym, fetch(`/data/hist/${encodeURIComponent(sym)}.json`).then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      }));
+    }
+    const card = box.querySelector<HTMLElement>('[data-chart]')!;
+    cache.get(sym)!.then(
+      (h) => {
+        if (abierta?.tr !== tr) return;
+        const cfg = {
+          type: 'line',
+          series: [{ key: sym, label: info.y, slot: 1, points: h.points }],
+          format: h.currency === 'USD' ? 'usd' : 'num',
+          area: true,
+          refLine: null,
+          height: 240,
+          range: '5a',
+        };
+        const s = document.createElement('script');
+        s.type = 'application/json';
+        s.textContent = JSON.stringify(cfg);
+        card.append(s);
+        mount(card);
+      },
+      () => {
+        cache.delete(sym);
+        const msg = card.querySelector('.hist-msg');
+        if (msg) msg.textContent = 'No se pudo cargar el gráfico. Probá de nuevo más tarde.';
+      },
+    );
+  }
+
+  document.querySelectorAll<HTMLTableElement>('table[data-sortable]').forEach((table) => {
+    table.addEventListener('tbl:sort', cerrar);
+    for (const tr of [...table.tBodies[0].rows]) {
+      const sym = tr.dataset.key;
+      if (!sym || !index[sym]) continue;
+      tr.classList.add('has-hist');
+      tr.tabIndex = 0;
+      tr.setAttribute('aria-expanded', 'false');
+      const alternar = () => {
+        const estaba = abierta?.tr === tr;
+        cerrar();
+        if (!estaba) abrir(table, tr, sym);
+      };
+      tr.addEventListener('click', alternar);
+      tr.addEventListener('keydown', (e) => {
+        if (e.target !== tr || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault();
+        alternar();
+      });
+    }
+  });
+</script>
