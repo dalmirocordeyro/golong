@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import DataTable, { type Column } from '../components/DataTable.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import Updated from '../components/Updated.astro';
 import { getSiteData } from '../lib/data';
 import { compact, price } from '../lib/format';
@@ -16,10 +15,6 @@ const cols: Column<Quote>[] = [
   { key: 'price', label: 'Precio', v: (r) => r.price, html: (r) => `US$${price(r.price)}` },
   { key: 'pct', label: 'Var. %', v: (r) => r.pct, html: (r) => deltaHtml(r.pct, { plain: true }) },
   { key: 'monto', label: 'Monto', v: (r) => r.monto, html: (r) => `US$${compact(r.monto)}`, opt: true },
-];
-const faq = [
-  { q: '¿Qué es un ADR?', a: '<p>Un American Depositary Receipt: un certificado que permite que las acciones de una empresa extranjera se negocien en la bolsa de Nueva York. Muchas empresas argentinas, como YPF, tienen ADRs.</p>' },
-  { q: '¿Por qué miran los ADRs cuando la bolsa porteña está cerrada?', a: '<p>Porque Wall Street opera en otro horario y en días que en Argentina pueden ser feriado. Los ADRs anticipan cómo puede abrir el mercado local.</p>' },
 ];
 ---
 <Base title="ADRs argentinos hoy: YPF y más en Wall Street" description="Cotización de los ADRs argentinos hoy en Nueva York: YPF, Pampa, Mercado Libre, Globant, Vista y más, con variación diaria." crumbs={[{ label: 'ADRs', href: '/adrs' }]}>
@@ -35,5 +30,4 @@ const faq = [
 
   <AdSlot slot="inline" />
 
-  <Faq items={faq} />
 </Base>
