@@ -394,6 +394,15 @@ main { padding-bottom: 48px; }
 .tbl thead th:first-child, .tbl tbody th:first-child, .tbl td:first-child { text-align: left; padding-left: 0; position: sticky; left: 0; background: var(--surface); z-index: 1; }
 .tbl th:last-child, .tbl td:last-child { padding-right: 0; }
 .tbl tbody tr:hover td, .tbl tbody tr:hover th { background: var(--surface-2); }
+/* Filas con gráfico desplegable (CEDEARs) */
+.tbl tbody tr.has-hist { cursor: pointer; }
+.tbl tbody tr.has-hist:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tbl tbody tr.open td, .tbl tbody tr.open th { background: var(--surface-2); border-bottom: 0; }
+.tbl tbody tr.hist-row td, .tbl tbody tr.hist-row:hover td { position: static; padding: 0; text-align: left; white-space: normal; background: var(--surface); }
+.hist-box { position: sticky; left: 0; padding: 14px 2px 18px; box-sizing: border-box; }
+.hist-box h3 { margin: 0; font-size: 1rem; }
+.hist-box .chart-toolbar p { margin: 2px 0 0; font-size: 0.84rem; }
+.hist-box .hist-msg { margin: 0; padding: 60px 0; text-align: center; font-size: 0.9rem; }
 .tbl .sym { font-weight: 680; color: var(--text); }
 .tbl .sym small { display: block; font-weight: 450; color: var(--muted); font-size: 0.76rem; }
 .tbl th button { all: unset; cursor: pointer; }
