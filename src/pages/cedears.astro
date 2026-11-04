@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import DataTable, { type Column } from '../components/DataTable.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import Updated from '../components/Updated.astro';
 import { getSiteData } from '../lib/data';
 import { compact, price } from '../lib/format';
@@ -24,10 +23,6 @@ const etfCols: Column<Quote>[] = [
   { key: 'sym', label: 'ETF', v: (r) => r.symbol, html: (r) => `<span class="sym">${escapeHtml(r.symbol)}<small>${escapeHtml(ETF_INFO[r.symbol][0])}</small></span>` },
   { key: 'tipo', label: 'Tipo', v: (r) => etfOrder.indexOf(r.symbol), html: (r) => escapeHtml(ETF_INFO[r.symbol][1]), opt: true, align: 'left' },
   ...cols.slice(1),
-];
-const faq = [
-  { q: '¿Qué es un CEDEAR?', a: '<p>Un Certificado de Depósito Argentino: representa una fracción de una acción o ETF que cotiza en el exterior, pero se compra y vende en pesos en la bolsa argentina. Así se puede invertir en empresas como Apple o en índices como el S&amp;P 500 desde una cuenta local.</p>' },
-  { q: '¿Por qué un CEDEAR sube aunque la acción no se mueva?', a: '<p>Porque su precio en pesos depende de dos cosas: el precio de la acción en dólares y el tipo de cambio implícito (CCL). Si el dólar CCL sube, el CEDEAR en pesos también sube.</p>' },
 ];
 ---
 <Base title="CEDEARs hoy: cotización en pesos de acciones y ETFs" description="Cotización de CEDEARs hoy en pesos: ETFs de índices, semiconductores (SMH), energía (XLE), finanzas (XLF), emergentes (EEM), oro y bitcoin, y las acciones más operadas como Apple, Nvidia o Mercado Libre." crumbs={[{ label: 'CEDEARs', href: '/cedears' }]}>
@@ -52,5 +47,4 @@ const faq = [
     <DataTable rows={stockRows} columns={cols} caption="CEDEARs de acciones" sortKey="monto" note="Monto operado en pesos." />
   </section>
 
-  <Faq items={faq} />
 </Base>
