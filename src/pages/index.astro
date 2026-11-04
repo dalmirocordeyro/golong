@@ -8,7 +8,6 @@ import Delta from '../components/Delta.astro';
 import Price from '../components/Price.astro';
 import MarketList from '../components/MarketList.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Faq from '../components/Faq.astro';
 import { getSiteData } from '../lib/data';
 import { brecha, brechaHistory, breadth, lastDays } from '../lib/derived';
 import { renderSparkline } from '../lib/chart';
@@ -31,24 +30,6 @@ const carry = data.letras
   .sort((x, y) => y.tem - x.tem)[0];
 const inf = data.inflacion;
 
-const faq = [
-  {
-    q: '¿Cada cuánto se actualiza la cotización del dólar?',
-    a: '<p>Mientras tenés la página abierta, los precios del dólar se vuelven a consultar cada minuto y las criptomonedas cada dos minutos, sin recargar. El resto de los datos (acciones, bonos, riesgo país e inflación) se actualiza varias veces por hora. Cada valor muestra cuándo fue su última actualización.</p>',
-  },
-  {
-    q: '¿Qué es la brecha cambiaria?',
-    a: '<p>Es la diferencia porcentual entre un dólar alternativo (blue, MEP, CCL o cripto) y el dólar oficial. Por ejemplo, si el oficial vale $1.000 y el blue $1.100, la brecha es del 10%. Se usa como termómetro de la presión sobre el tipo de cambio. <a href="/brecha">Ver la brecha y su historial</a>.</p>',
-  },
-  {
-    q: '¿Qué diferencia hay entre el dólar blue, el MEP y el CCL?',
-    a: '<p>El <strong>blue</strong> se opera en el mercado informal. El <strong>MEP</strong> (o dólar bolsa) se obtiene comprando un bono en pesos y vendiéndolo en dólares dentro del país, de forma legal. El <strong>CCL</strong> (contado con liquidación) funciona igual pero los dólares quedan en una cuenta del exterior. Cada uno tiene su página con historial y explicación.</p>',
-  },
-  {
-    q: '¿De dónde salen los datos?',
-    a: `<p>De APIs públicas y gratuitas: DolarApi y ArgentinaDatos para dólar, riesgo país, inflación y plazos fijos; data912 para acciones, bonos y CEDEARs; y CoinGecko para criptomonedas. El detalle está en <a href="/fuentes">Fuentes de datos</a>. ${SITE.name} no opera ni vende divisas.</p>`,
-  },
-];
 ---
 <Base
   title={`Dólar hoy en Argentina: blue, oficial, MEP y CCL en vivo | ${SITE.name}`}
@@ -194,5 +175,4 @@ const faq = [
 
   <AdSlot slot="inline" />
 
-  <Faq items={faq} />
 </Base>
