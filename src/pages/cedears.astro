@@ -122,7 +122,10 @@ const etfCols: Column<Quote>[] = [
     tr.setAttribute('aria-expanded', 'true');
 
     // El cuadro ocupa el ancho visible de la tabla aunque la tabla se deslice hacia los costados.
-    const ajustar = () => (box.style.width = `${wrap.clientWidth}px`);
+    const ajustar = () => {
+      const cs = getComputedStyle(wrap);
+      box.style.width = `${wrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)}px`;
+    };
     const ro = new ResizeObserver(ajustar);
     ro.observe(wrap);
     ajustar();
