@@ -5,8 +5,8 @@ import { ETF_INFO } from '../content/names';
 import { LETRAS, LETRA_INFO } from '../content/letras';
 import { arDateKey } from './format';
 import { compactHistory, lastBefore } from './series';
-import { COINGECKO_URL, normalizeCrypto, type CgRow } from './sources-client';
-import type { Bond, ComprasBcra, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
+import { BYMA_CAUCIONES_BODY, BYMA_CAUCIONES_URL, COINGECKO_URL, normalizeCauciones, normalizeCrypto, type BymaCaucion, type CgRow } from './sources-client';
+import type { Bond, Caucion, ComprasBcra, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
 
 // ── DolarApi.com + ArgentinaDatos (historial) ───────────────
 
@@ -308,4 +308,17 @@ export async function fetchCrypto(): Promise<Crypto[]> {
   // Opcional: una "Demo API key" gratuita de CoinGecko evita límites en los servidores de GitHub.
   const key = process.env.COINGECKO_API_KEY;
   return normalizeCrypto(await fetchJSON<CgRow[]>(key ? `${COINGECKO_URL}&x_cg_demo_api_key=${encodeURIComponent(key)}` : COINGECKO_URL));
+}
+
+export async function fetchCauciones(): Promise<Caucion[]> {
+  const rows = await fetchJSON<BymaCaucion[]>(BYMA_CAUCIONES_URL, {
+    method: 'POST',
+    body: BYMA_CAUCIONES_BODY,
+    headers: { 'content-type': 'application/json' },
+    timeoutMs: 15000,
+    retries: 1,
+  });
+  const c = normalizeCauciones(Array.isArray(rows) ? rows : []);
+  if (!c.length) throw new Error('BYMA: no hay cauciones operadas');
+  return c;
 }
