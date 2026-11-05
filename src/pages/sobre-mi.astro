@@ -16,7 +16,7 @@ const person = {
   ...(a.sameAs.length ? { sameAs: a.sameAs } : {}),
 };
 ---
-<Base title={a.name} description={`${a.name}: autor de ${SITE.name}, un proyecto personal sin fines de lucro sobre el dólar y los mercados de Argentina.`} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[{ '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person }]}>
+<Base title={a.name} description={`${a.name}: Autor de ${SITE.name}. Gráficos y Datos. Proyecto SIN FINES DE LUCRO - SIN PUBLICIDAD - SIN INGRESOS - Para experimentar con las tecnologías con las que el sitio está realizado`} crumbs={[{ label: 'Sobre mí', href: '/sobre-mi' }]} jsonLd={[{ '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person }]}>
   <section class="page-head">
     <h1>{a.name}</h1>
     {a.sameAs.length > 0 && (
