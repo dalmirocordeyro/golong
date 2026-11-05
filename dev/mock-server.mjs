@@ -140,7 +140,27 @@ function yahooChart(sym) {
   };
 }
 
+// BYMA: cauciones en pesos, dólares y cable (tasas como fracción, como la API real).
+function bymaCauciones() {
+  const r = rng('byma');
+  const out = [];
+  for (const [sym, ccy, base] of [['PESOS', 'ARS', 0.24], ['DOLAR', 'USD', 0.018], ['CABLE', 'EXT', 0.03]]) {
+    for (const d of [1, 2, 3, 4, 7, 8, 14, 21, 28, 30, 35, 60, 90, 120]) {
+      const operada = d <= 8 || r() < (sym === 'CABLE' ? 0.1 : 0.6);
+      const t = +(base * (1 + d / 400) + (r() - 0.5) * base * 0.15).toFixed(4);
+      out.push({
+        symbol: `${sym}-${String(d).padStart(4, '0')}-U-CT-${ccy}`, underlyingSymbol: sym, denominationCcy: ccy, securityType: 'QS',
+        daysToMaturity: d, maturityDate: addDays(TAIL_END, d), trade: operada ? t : 0, closingPrice: t,
+        vwap: operada ? +(t * (0.97 + r() * 0.06)).toFixed(6) : 0, previousClosingPrice: +(t * (0.95 + r() * 0.1)).toFixed(4),
+        volumeAmount: operada ? Math.round((sym === 'PESOS' ? 5e12 : 8e8) / d ** 1.4 * (0.5 + r())) : 0,
+      });
+    }
+  }
+  return out;
+}
+
 const routes = [
+  [/^\/open\.bymadata\.com\.ar\/vanoms-be-core\/rest\/api\/bymadata\/free\/cauciones$/, () => bymaCauciones()],
   [/^\/query1\.finance\.yahoo\.com\/v8\/finance\/chart\/([A-Za-z0-9.\-]+)$/, (m) => yahooChart(decodeURIComponent(m[1]))],
   [/^\/dolarapi\.com\/v1\/dolares$/, () => fx.dol],
   [/^\/dolarapi\.com\/v1\/cotizaciones$/, () => fx.cot],
