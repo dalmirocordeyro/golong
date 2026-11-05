@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+import Updated from '../components/Updated.astro';
+import { getSiteData } from '../lib/data';
+import { GRUPOS, destacadaHtml, destacadas, filasHtml } from '../lib/cauciones';
+
+const data = await getSiteData();
+const all = data.cauciones ?? [];
+const tiles = destacadas(all).map((t) => ({ label: t.label, ...destacadaHtml(t.c) }));
+---
+<Base title="Cauciones hoy: tasa de caución en pesos y en dólares" description="Tasas de caución bursátil en BYMA por plazo: TNA, TEA, tasa promedio y monto operado, en pesos y en dólares." crumbs={[{ label: 'Cauciones', href: '/cauciones' }]}>
+  <section class="page-head">
+    <h1>Cauciones hoy</h1>
+    <p class="lead">Tasas de caución bursátil en BYMA por plazo, en pesos y en dólares. Solo los plazos con operaciones en el día.</p>
+    <div class="status-line"><span data-cau-estado><Updated iso={data.generatedAt} prefix="Datos de " /></span></div>
+  </section>
+
+  <div class="grid g-3" data-cau-tiles>
+    {tiles.map((t) => (
+      <article class="card stat">
+        <div class="label"><span>{t.label}</span></div>
+        <div class="value" set:html={t.value} />
+        <div class="note" set:html={t.note} />
+      </article>
+    ))}
+  </div>
+
+  {GRUPOS.map((g) => {
+    const rows = all.filter((c) => c.moneda === g.moneda);
+    return (
+      <section class="section card" data-cau-grupo={g.moneda} hidden={g.moneda === 'CCL' && !rows.length}>
+        <h2 class="card-title">{g.titulo}</h2>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <caption class="visually-hidden">Cauciones {g.titulo.toLowerCase()} por plazo</caption>
+            <thead>
+              <tr><th scope="col">Plazo</th><th scope="col" class="opt">Vence</th><th scope="col">TNA</th><th scope="col" class="opt">TEA</th><th scope="col">TNA promedio</th><th scope="col" class="opt">Monto</th></tr>
+            </thead>
+            <tbody set:html={filasHtml(rows, g.cur)} />
+          </table>
+        </div>
+      </section>
+    );
+  })}
+  <p class="tbl-foot">Fuente: BYMA. TNA de la última operación; TNA promedio ponderada por monto; TEA calculada renovando al mismo plazo.</p>
+</Base>
+
+<script>
+  import { BYMA_CAUCIONES_BODY, BYMA_CAUCIONES_URL, normalizeCauciones, type BymaCaucion } from '../lib/sources-client';
+  import { GRUPOS, destacadaHtml, destacadas, filasHtml } from '../lib/cauciones';
+
+  // Mientras la página está abierta, el navegador pide las tasas a BYMA cada minuto.
+  async function actualizar() {
+    if (document.hidden) return;
+    try {
+      const r = await fetch(BYMA_CAUCIONES_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: BYMA_CAUCIONES_BODY });
+      if (!r.ok) return;
+      const all = normalizeCauciones((await r.json()) as BymaCaucion[]);
+      if (!all.length) return;
+      const tiles = document.querySelectorAll<HTMLElement>('[data-cau-tiles] .stat');
+      destacadas(all).forEach((t, i) => {
+        const h = destacadaHtml(t.c);
+        const el = tiles[i];
+        if (!el) return;
+        el.querySelector('.value')!.innerHTML = h.value;
+        el.querySelector('.note')!.innerHTML = h.note;
+      });
+      for (const g of GRUPOS) {
+        const sec = document.querySelector<HTMLElement>(`[data-cau-grupo="${g.moneda}"]`);
+        if (!sec) continue;
+        const rows = all.filter((c) => c.moneda === g.moneda);
+        sec.querySelector('tbody')!.innerHTML = filasHtml(rows, g.cur);
+        if (g.moneda === 'CCL') sec.hidden = !rows.length;
+      }
+      const hora = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+      const estado = document.querySelector('[data-cau-estado]');
+      if (estado) estado.textContent = `En vivo · ${hora}`;
+    } catch {
+      // Si BYMA no responde, quedan los datos de la última actualización del sitio.
+    }
+  }
+  actualizar();
+  setInterval(actualizar, 60_000);
+  document.addEventListener('visibilitychange', actualizar);
+</script>
