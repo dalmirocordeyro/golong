@@ -12,13 +12,13 @@ function resolve(url: string): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function fetchJSON<T = unknown>(url: string, { timeoutMs = 20000, retries = 2, headers = {} }: { timeoutMs?: number; retries?: number; headers?: Record<string, string> } = {}): Promise<T> {
+export async function fetchJSON<T = unknown>(url: string, { timeoutMs = 20000, retries = 2, headers = {}, method = 'GET', body }: { timeoutMs?: number; retries?: number; headers?: Record<string, string>; method?: string; body?: string } = {}): Promise<T> {
   let lastErr: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const res = await fetch(resolve(url), { signal: ctrl.signal, headers: { 'user-agent': UA, accept: 'application/json', ...headers } });
+      const res = await fetch(resolve(url), { method, body, signal: ctrl.signal, headers: { 'user-agent': UA, accept: 'application/json', ...headers } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return (await res.json()) as T;
     } catch (e) {
