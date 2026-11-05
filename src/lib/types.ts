@@ -113,7 +113,23 @@ export interface ComprasBcra {
   mensual: Point[];
 }
 
-export type SourceKey = 'dolarapi' | 'argentinadatos' | 'data912' | 'coingecko' | 'bcra';
+/** Caución bursátil en BYMA (una fila por plazo con operaciones en el día). Tasas en %. */
+export interface Caucion {
+  moneda: 'ARS' | 'USD' | 'CCL';
+  dias: number;
+  /** Fecha de vencimiento AAAA-MM-DD */
+  vence: string;
+  /** Tasa nominal anual de la última operación */
+  tna: number;
+  /** Tasa promedio del día, ponderada por monto */
+  prom: number | null;
+  /** Tasa de cierre del día anterior */
+  anterior: number | null;
+  /** Monto operado en la moneda de la caución */
+  monto: number;
+}
+
+export type SourceKey = 'dolarapi' | 'argentinadatos' | 'data912' | 'coingecko' | 'bcra' | 'byma';
 
 export interface SourceStatus {
   ok: boolean;
@@ -139,5 +155,7 @@ export interface SiteData {
   plazoFijo: PlazoFijo[];
   /** Puede faltar en snapshots viejos o si la API del BCRA no respondió nunca. */
   bcra?: ComprasBcra | null;
+  /** Puede faltar en snapshots viejos. */
+  cauciones?: Caucion[];
   sources: Record<SourceKey, SourceStatus>;
 }
