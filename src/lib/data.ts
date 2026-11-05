@@ -4,7 +4,7 @@
 import { readFile } from 'node:fs/promises';
 import { SITE } from '../site.config';
 import {
-  buildDollars, fetchComprasBcra, fetchCrypto, fetchDollarHistories, fetchDollarQuotes, fetchFx, fetchInflacion, fetchMarket, fetchPlazoFijo, fetchRiesgo,
+  buildDollars, fetchCauciones, fetchComprasBcra, fetchCrypto, fetchDollarHistories, fetchDollarQuotes, fetchFx, fetchInflacion, fetchMarket, fetchPlazoFijo, fetchRiesgo,
 } from './sources';
 import { fetchJSON } from './upstream';
 import type { SiteData, SourceKey, SourceStatus, Point } from './types';
@@ -27,7 +27,7 @@ async function loadPrevious(): Promise<SiteData | null> {
 
 async function build(): Promise<SiteData> {
   const prevP = loadPrevious();
-  const [quotes, fx, hist, riesgo, inflacion, plazoFijo, market, crypto, bcra] = await Promise.all([
+  const [quotes, fx, hist, riesgo, inflacion, plazoFijo, market, crypto, bcra, cauciones] = await Promise.all([
     settle(fetchDollarQuotes()),
     settle(fetchFx()),
     settle(fetchDollarHistories()),
@@ -37,6 +37,7 @@ async function build(): Promise<SiteData> {
     settle(fetchMarket()),
     settle(fetchCrypto()),
     settle(fetchComprasBcra()),
+    settle(fetchCauciones()),
   ]);
   const prev = await prevP;
 
@@ -50,6 +51,7 @@ async function build(): Promise<SiteData> {
     data912: status(market),
     coingecko: status(crypto),
     bcra: status(bcra),
+    byma: status(cauciones),
   };
 
   /** Datos esenciales: sin fuente ni snapshot previo, el build falla (y queda publicado el sitio anterior). */
@@ -99,6 +101,7 @@ async function build(): Promise<SiteData> {
     fx: pickOr(fx, (p) => p.fx, [], 'otras monedas'),
     plazoFijo: pickOr(plazoFijo, (p) => p.plazoFijo, [], 'plazo fijo'),
     bcra: pickOr(bcra, (p) => p.bcra ?? null, null, 'compras de divisas (BCRA)'),
+    cauciones: pickOr(cauciones, (p) => p.cauciones ?? [], [], 'cauciones (BYMA)'),
     sources,
   };
 
