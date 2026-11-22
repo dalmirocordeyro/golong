@@ -45,24 +45,31 @@ const inf = data.inflacion;
     <h1>Dólar Ahora</h1>
     <div class="status-line">
       <span class="pill" data-market-status data-state="closed"><span class="dot"></span><span class="lbl">Mercado</span></span>
-      <span>Precios de venta · se actualizan solos cada minuto</span>
+      <span>Precios de venta · se actualizan solos cada minuto<span data-live-status hidden> · última consulta <b data-live-clock></b></span></span>
     </div>
   </section>
 
   <div class="hero">
     <QuoteCard d={d.blue} />
     <QuoteCard d={d.oficial} />
+    <QuoteCard d={d.ccl} brecha={brecha(d, 'ccl')} />
     <article class="card quote-card brecha-card">
       <div class="top">
         <h2 class="mt-0"><a href="/brecha">Brecha cambiaria</a></h2>
         <span class="muted" style="font-size:.8rem">vs. oficial</span>
       </div>
-      <div>
-        <div class="muted" style="font-size:.8rem;margin-bottom:4px">Blue</div>
-        <span class="big num" data-live="brecha:blue">{pct(brecha(d, 'blue'), 1, false)}</span>
+      <div class="brecha-main">
+        <div>
+          <div class="muted" style="font-size:.8rem;margin-bottom:4px">Blue</div>
+          <span class="big num" data-live="brecha:blue">{pct(brecha(d, 'blue'), 1, false)}</span>
+        </div>
+        <div class="brecha-ccl">
+          <div style="font-size:.8rem;margin-bottom:4px">CCL</div>
+          <span class="big num" data-live="brecha:ccl">{pct(brecha(d, 'ccl'), 1, false)}</span>
+        </div>
       </div>
       <div class="brecha-list">
-        {(['mep', 'ccl', 'cripto'] as const).map((s) => (
+        {(['mep', 'cripto'] as const).map((s) => (
           <div class="brecha-row">
             <span class="lbl">{d[s].nombre}</span>
             <span class="val" data-live={`brecha:${s}`}>{pct(brecha(d, s), 1, false)}</span>
@@ -85,8 +92,8 @@ const inf = data.inflacion;
       <a class="more" href="/dolar">Comparar todas →</a>
     </div>
     <div class="grid g-4">
-      {(['mep', 'ccl', 'cripto', 'tarjeta', 'mayorista'] as const).map((s) => (
-        <MiniDollar d={d[s]} brecha={['mep', 'ccl', 'cripto'].includes(s) ? brecha(d, s) : null} />
+      {(['mep', 'cripto', 'tarjeta', 'mayorista'] as const).map((s) => (
+        <MiniDollar d={d[s]} brecha={['mep', 'cripto'].includes(s) ? brecha(d, s) : null} />
       ))}
     </div>
   </section>
