@@ -2,12 +2,12 @@
 import type { Dollar } from '../lib/types';
 import { renderSparkline } from '../lib/chart';
 import { lastDays } from '../lib/derived';
-import { price } from '../lib/format';
+import { pct, price } from '../lib/format';
 import Price from './Price.astro';
 import Delta from './Delta.astro';
 import Updated from './Updated.astro';
-interface Props { d: Dollar; headingLevel?: 'h2' | 'h3'; link?: boolean }
-const { d, headingLevel = 'h2', link = true } = Astro.props;
+interface Props { d: Dollar; headingLevel?: 'h2' | 'h3'; link?: boolean; brecha?: number | null }
+const { d, headingLevel = 'h2', link = true, brecha = null } = Astro.props;
 const H = headingLevel;
 const spark = renderSparkline(lastDays(d.history, 30), 300, 44, 1);
 ---
@@ -23,6 +23,7 @@ const spark = renderSparkline(lastDays(d.history, 30), 300, 44, 1);
   <div class="kv">
     {d.compra != null && <span>Compra <b><Price value={d.compra} live={`d:${d.slug}:compra`} /></b></span>}
     {d.compra != null && <span>Spread <b data-live={`d:${d.slug}:spread`}>${price(d.venta - d.compra)}</b></span>}
+    {brecha != null && <span class="kv-brecha">Brecha <b data-live={`brecha:${d.slug}`}>{pct(brecha, 1, false)}</b></span>}
     {d.prev != null && <span>Cierre ant. <b>${price(d.prev)}</b></span>}
   </div>
   <div class="spark-box" set:html={spark} aria-hidden="true" title="Últimos 30 días" />
