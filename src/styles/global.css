@@ -258,7 +258,8 @@ main { padding-bottom: 48px; }
 /* Hero del dólar */
 .hero { display: grid; gap: 12px; grid-template-columns: 1fr; }
 @media (min-width: 700px) { .hero { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1100px) { .hero { grid-template-columns: 1fr 1fr 0.9fr; gap: 16px; } }
+@media (min-width: 1100px) { .hero { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } }
+.hero .big { font-size: clamp(2.3rem, 1.6rem + 1.6vw, 2.9rem); }
 .quote-card { display: flex; flex-direction: column; gap: 10px; position: relative; }
 .quote-card .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .quote-card h2 { font-size: 1rem; font-weight: 650; }
@@ -281,6 +282,11 @@ main { padding-bottom: 48px; }
 .stat .spark { height: 36px; }
 
 .brecha-card .brecha-list { display: grid; gap: 10px; margin-top: 4px; }
+.brecha-main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.brecha-ccl { padding-left: 12px; border-left: 3px solid var(--accent); color: var(--accent); font-weight: 600; }
+.brecha-ccl .big { color: var(--accent); }
+.brecha-main .big { font-size: clamp(2rem, 1.5rem + 1vw, 2.4rem); }
+.kv-brecha b { color: var(--accent); }
 .brecha-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; font-size: 0.9rem; }
 .brecha-row .lbl { color: var(--text-2); }
 .brecha-row .val { font-weight: 650; font-variant-numeric: tabular-nums; }
