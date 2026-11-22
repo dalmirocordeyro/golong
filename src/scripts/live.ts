@@ -128,6 +128,8 @@ async function updateCrypto() {
 function markLive() {
   const now = new Date().toISOString();
   document.querySelectorAll<HTMLTimeElement>('time[data-live="refreshed"]').forEach((t) => (t.dateTime = now));
+  const hora = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+  document.querySelectorAll<HTMLElement>('[data-live-clock]').forEach((el) => (el.textContent = hora));
   document.querySelectorAll<HTMLElement>('[data-live-status]').forEach((el) => {
     el.hidden = false;
   });
