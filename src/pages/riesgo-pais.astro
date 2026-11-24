@@ -18,13 +18,13 @@ const all = rangeStats(r.history);
 <Base title="Riesgo país hoy: valor del EMBI de Argentina y evolución" description="Riesgo país de Argentina hoy: valor del índice EMBI de JP Morgan en puntos básicos, variación diaria y gráfico histórico desde 1999." crumbs={[{ label: 'Riesgo país', href: '/riesgo-pais' }]}>
   <section class="page-head">
     <h1>Riesgo país hoy</h1>
-    <p class="lead">Índice EMBI de JP Morgan para Argentina, en puntos básicos. Dato de cierre del {dmy(r.fecha)}.</p>
+    <p class="lead">Índice EMBI de JP Morgan para Argentina, en puntos básicos. Último dato: <span data-live="r:fecha">{dmy(r.fecha)}</span>. Se actualiza solo cada minuto.</p>
   </section>
 
   <div class="grid g-4">
-    <StatTile label="Riesgo país" note={`Cierre ${dmy(r.fecha)}`}>
-      <Delta slot="delta" value={r.varPts} mode="pts" />
-      {num(r.valor, 0)} <small>pts</small>
+    <StatTile label="Riesgo país" note="Variación contra el cierre anterior">
+      <Delta slot="delta" value={r.varPts} mode="pts" live="r:var" />
+      <span data-live="r:valor" data-v={r.valor}>{num(r.valor, 0)}</span> <small>pts</small>
     </StatTile>
     {m1 && <StatTile label="Último mes" note={`Hace un mes: ${num(m1.first, 0)} pts`}>{m1.changeAbs >= 0 ? '+' : ''}{num(m1.changeAbs, 0)} <small>pts</small></StatTile>}
     {y1 && <StatTile label="Mínimo del último año" note={dmy(y1.min[0])}>{num(y1.min[1], 0)} <small>pts</small></StatTile>}
