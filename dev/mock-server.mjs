@@ -159,7 +159,15 @@ function bymaCauciones() {
   return out;
 }
 
+// Ámbito: riesgo país del día siguiente al último cierre del fixture.
+function ambitoRiesgo() {
+  const last = fx.rpTail[fx.rpTail.length - 1];
+  const [y, m, d] = addDays(last.fecha, 1).split('-');
+  return { ultimo: String(last.valor + 12), fecha: `${d}-${m}-${y}`, variacion: '1,10%', 'class-variacion': 'up-red' };
+}
+
 const routes = [
+  [/^\/mercados\.ambito\.com\/riesgopais\/variacion$/, () => ambitoRiesgo()],
   [/^\/open\.bymadata\.com\.ar\/vanoms-be-core\/rest\/api\/bymadata\/free\/cauciones$/, () => bymaCauciones()],
   [/^\/query1\.finance\.yahoo\.com\/v8\/finance\/chart\/([A-Za-z0-9.\-]+)$/, (m) => yahooChart(decodeURIComponent(m[1]))],
   [/^\/dolarapi\.com\/v1\/dolares$/, () => fx.dol],
