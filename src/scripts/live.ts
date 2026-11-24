@@ -1,8 +1,8 @@
 // Actualiza precios en el navegador sin recargar la página.
 // Consulta directamente APIs públicas con CORS abierto (DolarApi y CoinGecko),
 // así no consume recursos del hosting. Si fallan, queda el dato del HTML.
-import { arDateKey, direction, num, pct, price, signedNum, splitPrice } from '../lib/format';
-import { COINGECKO_URL, normalizeCrypto } from '../lib/sources-client';
+import { arDateKey, direction, dmy, num, pct, price, signedNum, splitPrice } from '../lib/format';
+import { AMBITO_RIESGO_URL, COINGECKO_URL, normalizeCrypto, parseAmbitoRiesgo } from '../lib/sources-client';
 import type { LiveConfig } from '../lib/derived';
 import type { Point } from '../lib/types';
 import { refreshTimes } from './relative-time';
@@ -125,6 +125,27 @@ async function updateCrypto() {
   markLive();
 }
 
+// Riesgo país durante la rueda. La variación es contra el cierre anterior al dato.
+async function updateRiesgo() {
+  if (!cfg?.riesgo) return;
+  const res = await fetch(AMBITO_RIESGO_URL, { cache: 'no-store' });
+  if (!res.ok) throw new Error(String(res.status));
+  const v = parseAmbitoRiesgo(await res.json());
+  const r = cfg.riesgo;
+  if (!v || v.fecha < r.fecha) return;
+  const base = v.fecha > r.fecha ? r.valor : r.prev;
+  const delta = base == null ? null : v.valor - base;
+  all('r:valor').forEach((el) => {
+    const prevV = Number(el.dataset.v);
+    el.dataset.v = String(v.valor);
+    el.textContent = num(v.valor, 0);
+    if (Number.isFinite(prevV) && prevV !== v.valor) flash(el, v.valor > prevV ? 'up' : 'down');
+  });
+  all('r:var').forEach((el) => setDelta(el, delta));
+  all('r:fecha').forEach((el) => (el.textContent = dmy(v.fecha)));
+  markLive();
+}
+
 function markLive() {
   const now = new Date().toISOString();
   document.querySelectorAll<HTMLTimeElement>('time[data-live="refreshed"]').forEach((t) => (t.dateTime = now));
@@ -161,4 +182,5 @@ if (cfg) {
   const has = (prefix: string) => document.querySelector(`[data-live^="${prefix}"]`) || document.querySelector(`[data-live-need~="${prefix}"]`);
   if (has('d:') || has('brecha:')) loop(updateDollars, DOLLAR_MS);
   if (has('c:')) loop(updateCrypto, CRYPTO_MS);
+  if (has('r:')) loop(updateRiesgo, DOLLAR_MS);
 }
