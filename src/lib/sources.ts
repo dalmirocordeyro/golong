@@ -5,7 +5,7 @@ import { ETF_INFO } from '../content/names';
 import { LETRAS, LETRA_INFO } from '../content/letras';
 import { arDateKey } from './format';
 import { compactHistory, lastBefore } from './series';
-import { BYMA_CAUCIONES_BODY, BYMA_CAUCIONES_URL, COINGECKO_URL, normalizeCauciones, normalizeCrypto, type BymaCaucion, type CgRow } from './sources-client';
+import { AMBITO_RIESGO_URL, BYMA_CAUCIONES_BODY, BYMA_CAUCIONES_URL, COINGECKO_URL, normalizeCauciones, normalizeCrypto, parseAmbitoRiesgo, type BymaCaucion, type CgRow } from './sources-client';
 import type { Bond, Caucion, ComprasBcra, Crypto, Dollar, DollarSlug, FxRate, Inflacion, Letra, PlazoFijo, Point, Quote, Riesgo } from './types';
 
 // ── DolarApi.com + ArgentinaDatos (historial) ───────────────
@@ -68,13 +68,21 @@ export function buildDollars(quotes: DolarApiItem[], histories: Record<string, P
 // ── ArgentinaDatos: riesgo país, inflación, plazo fijo ──────
 
 export async function fetchRiesgo(): Promise<Riesgo> {
-  const [rows, ultimo] = await Promise.all([
+  const [rows, ultimo, ambito] = await Promise.all([
     fetchJSON<{ valor: number; fecha: string }[]>('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais'),
     fetchJSON<{ valor: number; fecha: string }>('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo').catch(() => null),
+    fetchJSON<unknown>(AMBITO_RIESGO_URL, { timeoutMs: 10000, retries: 1, headers: { 'user-agent': 'Mozilla/5.0 (compatible; dolarahora-build/1.0)' } }).catch(() => null),
   ]);
   const pts: Point[] = rows.map((r) => [r.fecha, r.valor]);
-  const last = ultimo ?? rows[rows.length - 1];
+  let last = ultimo ?? rows[rows.length - 1];
   if (pts.length && pts[pts.length - 1][0] < last.fecha) pts.push([last.fecha, last.valor]);
+  // Dato del día en curso (o del mismo día, si ArgentinaDatos todavía no lo tiene actualizado).
+  const vivo = parseAmbitoRiesgo(ambito);
+  if (vivo && vivo.fecha >= last.fecha) {
+    if (pts.length && pts[pts.length - 1][0] === vivo.fecha) pts[pts.length - 1] = [vivo.fecha, vivo.valor];
+    else pts.push([vivo.fecha, vivo.valor]);
+    last = vivo;
+  }
   const prev = lastBefore(pts, last.fecha);
   return {
     valor: last.valor,
