@@ -55,3 +55,15 @@ export function normalizeCauciones(rows: BymaCaucion[]): Caucion[] {
     }))
     .sort((a, b) => ORDEN.indexOf(a.moneda) - ORDEN.indexOf(b.moneda) || a.dias - b.dias);
 }
+
+// Riesgo país durante la rueda (Ámbito). ArgentinaDatos publica solo el cierre del día anterior.
+export const AMBITO_RIESGO_URL = 'https://mercados.ambito.com/riesgopais/variacion';
+
+/** {"ultimo":"1096","fecha":"24-11-2026"} → { valor: 1096, fecha: '2026-11-24' } */
+export function parseAmbitoRiesgo(j: unknown): { valor: number; fecha: string } | null {
+  const o = (j ?? {}) as { ultimo?: unknown; fecha?: unknown };
+  const valor = Number(String(o.ultimo ?? '').replace(/\./g, '').replace(',', '.'));
+  const m = String(o.fecha ?? '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (!Number.isFinite(valor) || valor <= 0 || !m) return null;
+  return { valor, fecha: `${m[3]}-${m[2]}-${m[1]}` };
+}
