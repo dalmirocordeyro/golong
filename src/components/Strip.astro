@@ -18,7 +18,7 @@ const btc = data.crypto.find((c) => c.id === 'bitcoin');
       </a>
     ))}
     <a href="/brecha">Brecha <b data-live="brecha:blue">{pct(brecha(d, 'blue'), 1, false)}</b></a>
-    <a href="/riesgo-pais">Riesgo país <b>{num(data.riesgo.valor, 0)}</b> <Delta value={data.riesgo.varPts} mode="pts" plain /></a>
+    <a href="/riesgo-pais">Riesgo país <b data-live="r:valor" data-v={data.riesgo.valor}>{num(data.riesgo.valor, 0)}</b> <Delta value={data.riesgo.varPts} mode="pts" plain live="r:var" /></a>
     <a href="/inflacion">Inflación <b>{pct(data.inflacion.ultimo[1], 1, false)}</b></a>
     {btc && (
       <a href="/cripto">BTC <b data-live="c:bitcoin:price" data-fmt="plain" data-cur="US$" data-dec="0">US${num(btc.price, 0)}</b> <Delta value={btc.pct24h} plain live="c:bitcoin:pct24h" /></a>
