@@ -44,6 +44,7 @@ export function liveConfig(data: SiteData) {
       tail: d.history.slice(-10),
     })),
     crypto: data.crypto.map((c) => c.id),
+    riesgo: { valor: data.riesgo.valor, fecha: data.riesgo.fecha, prev: data.riesgo.prev },
   };
 }
 export type LiveConfig = ReturnType<typeof liveConfig>;
