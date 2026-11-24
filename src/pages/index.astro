@@ -113,8 +113,8 @@ const inf = data.inflacion;
     />
     <div class="grid" style="align-content:start">
       <StatTile label="Riesgo país" href="/riesgo-pais" spark={renderSparkline(lastDays(data.riesgo.history, 90), 300, 36, 1)} note={`Puntos básicos · EMBI de JP Morgan`}>
-        <Delta slot="delta" value={data.riesgo.varPts} mode="pts" />
-        {num(data.riesgo.valor, 0)} <small>pts</small>
+        <Delta slot="delta" value={data.riesgo.varPts} mode="pts" live="r:var" />
+        <span data-live="r:valor" data-v={data.riesgo.valor}>{num(data.riesgo.valor, 0)}</span> <small>pts</small>
       </StatTile>
       <StatTile label={`Inflación de ${monthYear(inf.ultimo[0], true)}`} href="/inflacion" note={`Interanual ${pct(inf.ultimoInteranual[1], 1, false)} · Acumulada ${inf.ultimo[0].slice(0, 4)} ${pct(inf.acumuladoAnio, 1, false)}`}>
         {pct(inf.ultimo[1], 1, false)} <small>mensual</small>
