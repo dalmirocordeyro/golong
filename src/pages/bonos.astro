@@ -45,7 +45,7 @@ const colsPesos: Column<Quote>[] = [
   <div class="grid g-4">
     {al30 && <StatTile label="AL30D" note="Bonar 2030 · ley local"><Delta slot="delta" value={al30.pctUsd} />US${price(al30.priceUsd)}</StatTile>}
     {gd30 && <StatTile label="GD30D" note="Global 2030 · ley NY"><Delta slot="delta" value={gd30.pctUsd} />US${price(gd30.priceUsd)}</StatTile>}
-    <StatTile label="Riesgo país" href="/riesgo-pais" note="Puntos básicos"><Delta slot="delta" value={data.riesgo.varPts} mode="pts" />{num(data.riesgo.valor, 0)}</StatTile>
+    <StatTile label="Riesgo país" href="/riesgo-pais" note="Puntos básicos"><Delta slot="delta" value={data.riesgo.varPts} mode="pts" live="r:var" /><span data-live="r:valor" data-v={data.riesgo.valor}>{num(data.riesgo.valor, 0)}</span></StatTile>
     {mepVals.length > 0 && <StatTile label="MEP implícito (rango)" href="/dolar/mep" note="Según el bono que uses"><span style="font-size:.82em">${num(Math.min(...mepVals), 0)}–{num(Math.max(...mepVals), 0)}</span></StatTile>}
   </div>
 
